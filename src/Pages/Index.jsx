@@ -116,9 +116,9 @@ const Index = () => {
 
 }
 
-useEffect(() => {
-  window.scrollTo({ top: 0, behavior: "smooth" });
-},[currentStep])
+// useEffect(() => {
+//   window.scrollTo({ top: 0, behavior: "smooth" });
+// },[currentStep])
 
   const handleBack = () => {
     dispatch(prevStep());
