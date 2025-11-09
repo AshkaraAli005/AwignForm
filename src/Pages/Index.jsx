@@ -253,7 +253,7 @@ useEffect(() => {
             <div className="flex items-center gap-1">
              <img src={AwignLogo} height={"50px"} width={50} alt="Awign Logo" />
               <div>
-                <h1 className="text-2xl font-bold gradient-text">Awign Onboarding Interface</h1>
+                <h1 className="text-lg md:text-2xl font-bold gradient-text">Awign Onboarding Interface</h1>
                 <p className="text-sm text-muted-foreground">Complete your registration</p>
               </div>
             </div>
@@ -266,7 +266,7 @@ useEffect(() => {
       </header>
 
          <div className="container mx-auto px-4 py-8 max-w-8xl">
-        <div className="flex gap-8">
+        <div className="flex flex-col gap-1 lg:flex-row lg:gap-8">
           {/* Vertical Stepper Sidebar (Desktop) - Scrollable */}
           <FormStepper steps={steps} onStepClick={handleStepClick} />
 

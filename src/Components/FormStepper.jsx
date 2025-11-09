@@ -5,8 +5,8 @@ const FormStepper = ({ steps, onStepClick }) => {
   return (
     <>
       {/* Mobile View - Horizontal Compact */}
-      <div className="lg:hidden mb-8 px-2 sm:px-4">
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-hide">
+      <div className="lg:hidden flex justify-center mb-8 px-2 sm:px-4">
+        <div className="flex items-center gap-2 overflow-x-auto p-4 scrollbar-hide">
           {steps.map((step, index) => (
             <div 
               key={step.number} 
