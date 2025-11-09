@@ -1,12 +1,38 @@
-
 import {
+  FileText,
   Image as ImageIcon,
   AlertTriangle,
+  X,
 } from "lucide-react";
 
 import { Badge } from "../Components/Ui/badge";
 import { Separator } from "../Components/Ui/separator";
 import { useRef } from "react";
+
+export const isValidEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+  return emailRegex.test(email);
+};
+
+export const isValidPAN = (pan) => {
+  const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+  return panRegex.test(pan.toUpperCase());
+};
+
+export const sanitizeInput = (value, allowedPattern) => {
+  return value.replace(new RegExp(`[^${allowedPattern}]`, "g"), "");
+};
+
+export const validationRules = {
+  name: "a-zA-Z0-9-_ ", // only letters and numbers
+  nameWithoutSpace: "a-zA-Z0-9-_",
+  numbers: "0-9", // only digits
+  alphabets: "a-zA-Z", // only alphabets
+  alphanumericWithSpace: "a-zA-Z0-9 ", // letters, numbers, spaces
+  alphanumericWithoutSpace: "a-zA-Z0-9",
+  email: "a-zA-Z0-9@._-", // email,
+  entityFields: "A-Za-z0-9 !\"#$%&'()*+,-./:;<=>?@[\\]_`{|}\\t\\n",
+};
 
  
  export const getVerificationRes = (verifications) => {
@@ -127,3 +153,100 @@ import { useRef } from "react";
               </div>
             </div>
           </div>)}
+
+
+/**
+ * Recursively appends keys and values to FormData
+ * Handles nested objects, arrays, and file fields
+ */
+
+export const convertToFormData = (data, formData = new FormData(), parentKey = "") => {
+  Object.entries(data).forEach(([key, value]) => {
+    const fieldKey = parentKey ? `${parentKey}.${key}` : key;
+
+    if (value === null || value === undefined) {
+      return; // skip nulls
+    }
+
+    // 🖼️ If the value is a File or Blob
+    if (value instanceof File || value instanceof Blob) {
+      formData.append(fieldKey, value);
+    }
+    // 📁 If the value is an object (but not a File)
+    else if (typeof value === "object" && !(value instanceof Date)) {
+      // If it's an empty object (e.g., {})
+      if (Object.keys(value).length === 0) {
+        formData.append(fieldKey, ""); // treat as empty
+      } else {
+        convertToFormData(value, formData, fieldKey);
+      }
+    }
+    // 🗓️ Handle dates properly
+    else if (value instanceof Date) {
+      formData.append(fieldKey, value.toISOString());
+    }
+    // 🔢 or 📄 Handle strings/numbers/booleans normally
+    else {
+      formData.append(fieldKey, value);
+    }
+  });
+
+  return formData;
+};
+
+
+export const FilePreview = ({ label, file, handleViewClick, handleRemove }) => {
+  if (!file) return null;
+
+  const isImage = file.type.startsWith("image/");
+  const fileUrl = URL.createObjectURL(file);
+
+  return (
+    <div className="space-y-2">
+      <span className="text-sm font-semibold text-foreground">{label}</span>
+      <div
+  className="relative group cursor-pointer rounded-xl border-2 border-border/50 hover:border-primary/50 transition-all overflow-hidden bg-secondary/30 hover:shadow-lg"
+  onClick={() => isImage && handleViewClick(fileUrl)}
+>
+  {isImage ? (
+    <div className="relative">
+      <img
+        src={fileUrl}
+        alt={label}
+        className="w-full h-48 object-contain bg-background/50 rounded-lg"
+      />
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+        <ImageIcon className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+      </div>
+    </div>
+  ) : (
+    <div className="h-48 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex flex-col items-center justify-center gap-3">
+      <FileText className="w-16 h-16 text-primary" />
+      <p className="text-sm font-medium text-foreground">{file.name}</p>
+    </div>
+  )}
+
+  <div className="p-3 rounded-b-md bg-background/80 backdrop-blur-sm border-t border-border/50 flex items-center justify-between">
+    <div>
+      <p className="text-xs text-muted-foreground truncate">{file.name}</p>
+      <p className="text-xs text-muted-foreground">
+        {(file.size / 1024).toFixed(2)} KB
+      </p>
+    </div>
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation(); // ✅ prevents parent click from firing
+        e.preventDefault();
+        handleRemove();
+      }}
+      className="p-2.5 hover:bg-destructive/10 rounded-xl transition-all duration-200 group flex-shrink-0"
+    >
+      <X className="w-5 h-5 text-destructive group-hover:scale-110 transition-transform" />
+    </button>
+  </div>
+</div>
+
+    </div>
+  );
+};

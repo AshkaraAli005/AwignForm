@@ -14,8 +14,9 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { format } from "date-fns";
 import { cn } from "../../lib/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { validatePhone } from "../../utils/formValidation";
+import { sanitizeInput, validationRules } from "../../utils/commonFunctions";
 
 const BasicDetailsStep = () => {
   const dispatch = useAppDispatch();
@@ -32,6 +33,10 @@ const BasicDetailsStep = () => {
     email: "",
   });
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  },[])
+
   return (
     <div className="space-y-6">
       <FormField
@@ -40,27 +45,18 @@ const BasicDetailsStep = () => {
         hint="Example - Full Name - Abhishek Kumar Singh (First Name - Abhishek, Middle Name - Kumar, Last Name - Singh)"
         required
         value={basicDetails.fullName}
-        placeholder={"Name"}
-        onChange={(value) => dispatch(updateBasicDetails({ fullName: value }))}
+        placeholder="Enter full name"
+        onChange={(value) => dispatch(updateBasicDetails({ fullName: sanitizeInput(value, validationRules.name) }))}
       />
-
-      {/* <FormField
-        icon={Phone}
-        label="Mobile number"
-        hint="Give an active phone number for registration & communication. Do not use already registered mobile numbers."
-        required
-        type="number"
-        value={basicDetails.mobileNumber}
-        onChange={(value) => dispatch(updateBasicDetails({ mobileNumber: value }))}
-      /> */}
-
             <div>
         <FormField
           icon={Phone}
           label="Mobile number"
           required
           type="number"
+          hint="Give an active phone number for registration & communication. Do not use already registered mobile numbers."
           value={basicDetails.mobileNumber}
+          placeholder="Enter mobile number" 
           onChange={handlePhoneChange}
         />
         {errors.mobileNumber && (
@@ -74,6 +70,7 @@ const BasicDetailsStep = () => {
         required
         type="number"
         value={basicDetails.alternateMobileNumber}
+        placeholder="Enter alternate mobile number"
         onChange={(value) => dispatch(updateBasicDetails({ alternateMobileNumber: value }))}
       />
 
@@ -85,67 +82,21 @@ const BasicDetailsStep = () => {
         required
         type="email"
         value={basicDetails.email}
-        onChange={(value) => dispatch(updateBasicDetails({ email: value }))}
+        placeholder="Enter Email ID"
+        onChange={(value) => dispatch(updateBasicDetails({ email: sanitizeInput(value, validationRules.email) }))}
       />
 
-<div className="space-y-2">
-<div>
+<div className="space-y-3 group animate-fade-in">
+    <div>
         <Label className="flex items-center gap-2 text-sm font-medium">
-          <div className="w-6 h-6 rounded bg-[hsl(var(--form-icon-bg))] text-[hsl(var(--form-icon-text))] flex items-center justify-center">
-            <Calendar className="w-4 h-4" />
-          </div>
+           <div className="w-8 h-8 rounded-xl gradient-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+          <Calendar className="w-4 h-4 text-white" />
+        </div>
           Date of Birth
           <span className="text-destructive ml-1">*</span>
         </Label>
-        <p className="text-xs text-muted-foreground">Please mention valid DOB as per documents to avoid rejection.</p>
-        </div>
-        {/* <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                "w-full justify-start text-left font-normal bg-background",
-                !basicDetails.dateOfBirth && "text-muted-foreground"
-              )}
-            >
-              <Calendar className="mr-2 h-4 w-4" />
-              {basicDetails.dateOfBirth ? format(new Date(basicDetails.dateOfBirth), "PPP") : "Pick a date"}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 bg-background z-50" align="start">
-            <CalendarComponent
-              mode="single"
-              selected={basicDetails.dateOfBirth ? new Date(basicDetails.dateOfBirth) : undefined}
-              onSelect={(date) => date && dispatch(updateBasicDetails({ dateOfBirth: format(date, "yyyy-MM-dd") }))}
-              disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-              initialFocus
-              onClose={() => setPopoverOpen(false)}
-              className="pointer-events-auto"
-            />
-          </PopoverContent>
-        </Popover> */}
-              {/* <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outlined"
-            fullWidth
-            className={cn(
-              "justify-start text-left font-normal bg-background",
-              !basicDetails.dateOfBirth && "text-muted-foreground"
-            )}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {basicDetails.dateOfBirth
-              ? format(new Date(basicDetails.dateOfBirth), "PPP")
-              : "Pick a date"}
-          </Button>
-        </PopoverTrigger> */}
-{/* 
-        <PopoverContent
-          className="p-3 bg-background z-50"
-          align="start"
-          sideOffset={4}
-        > */}
+         <p className="text-xs text-muted-foreground leading-relaxed pl-10">Please mention valid DOB as per documents to avoid rejection.</p>
+      </div>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DatePicker
               value={
@@ -179,23 +130,23 @@ const BasicDetailsStep = () => {
               }}
             />
           </LocalizationProvider>
-        {/* </PopoverContent>
-      </Popover> */}
       </div>
 
       <div className="space-y-2">
+          <div>
         <Label className="flex items-center gap-2 text-sm font-medium">
-          <div className="w-6 h-6 rounded bg-[hsl(var(--form-icon-bg))] text-[hsl(var(--form-icon-text))] flex items-center justify-center">
-            <MapPin className="w-4 h-4" />
-          </div>
+           <div className="w-8 h-8 rounded-xl gradient-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+          <MapPin className="w-4 h-4 text-white" />
+        </div>
           City
           <span className="text-destructive ml-1">*</span>
         </Label>
+      </div>
         <Select
           value={basicDetails.city}
           onValueChange={(value) => dispatch(updateBasicDetails({ city: value }))}
         >
-          <SelectTrigger className="bg-background">
+          <SelectTrigger className=" data-[placeholder]:text-gray-400">
             <SelectValue placeholder="Select city" />
           </SelectTrigger>
           <SelectContent>
@@ -212,16 +163,19 @@ const BasicDetailsStep = () => {
         icon={User}
         label="Mother's Name"
         required
+        placeholder="Enter mother's name"
         value={basicDetails.motherName}
-        onChange={(value) => dispatch(updateBasicDetails({ motherName: value }))}
+        onChange={(value) => dispatch(updateBasicDetails({ motherName: sanitizeInput(value, validationRules.name) }))}
       />
 
       <FormField
         icon={User}
         label="Father's Name"
         required
+        
+        placeholder="Enter father's name"
         value={basicDetails.fatherName}
-        onChange={(value) => dispatch(updateBasicDetails({ fatherName: value }))}
+        onChange={(value) => dispatch(updateBasicDetails({ fatherName: sanitizeInput(value, validationRules.name) }))}
       />
 
       <FileUpload

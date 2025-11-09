@@ -110,7 +110,7 @@ const NeighbourStep = () => {
           value={neighbour.howDidYouKnow}
           onValueChange={(value) => dispatch(updateNeighbour({ howDidYouKnow: value }))}
         >
-          <SelectTrigger className="bg-background">
+          <SelectTrigger className="data-[placeholder]:text-gray-400">
             <SelectValue placeholder="Select option" />
           </SelectTrigger>
           <SelectContent>

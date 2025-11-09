@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Sparkles, Save } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles, Save, User, GraduationCap, CreditCard, FileText, Home, Users, ClipboardCheck  } from "lucide-react";
 import { Button } from "../Components/Ui/button";
 import { Card } from "../Components/Ui/card";
 import FormStepper from "../Components/FormStepper";
@@ -11,31 +11,65 @@ import NeighbourStep from "../Components/Steppers/NeighboursStep";
 import SummaryStep from "../Components/Steppers/SummaryStep";
 import RoleSelection from "./RoleSelection";
 import { useAppDispatch, useAppSelector } from "../Store/hooks";
-import { nextStep, prevStep,setCurrentStep } from "../Store/formSlice";
+import { nextStep, prevStep,setCurrentStep, setHasSelectedRole } from "../Store/formSlice";
 import { toast } from "../Components/Ui/sonner";
 import { cn } from "../lib/utils";
 import { getStepValidationMessage, validateStep } from "../utils/formValidation";
 import { useEffect } from "react";
+import { convertToFormData } from "../utils/commonFunctions";
+import AwignLogo from "../assets/AwignLogo.png";
+import { useNavigate, useParams } from "react-router-dom";
+import { getAwignFormData, updateAwignFormData } from "../services/api";
 
 const Index = () => {
+    const { id } = useParams();
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const currentStep = useAppSelector((state) => state.form.currentStep);
   const hasSelectedRole = useAppSelector((state) => state.form.hasSelectedRole);
   const formState = useAppSelector((state) => state.form);
 
   // If role not selected, show role selection screen
-  if (!hasSelectedRole) {
-    return <RoleSelection />;
-  }
+
+
+    useEffect(() => {
+    const loadFormData = async () => {
+      console.log(id);
+      if (id && id !== 'new') {
+        setIsLoading(true);
+        try {
+          const data = await getFormById(id);
+          
+          // Load data into Redux store
+          dispatch(updateRole({ selectedRole: data.selectedRole }));
+          dispatch(setHasSelectedRole(true));
+          dispatch(updateBasicDetails(data.basicDetails ));
+          dispatch(updateQualification(data.qualification));
+          dispatch(updateAadhaar(data.aadhaar ));
+          dispatch(updatePanCard(data.panCard ));
+          dispatch(updateAddress(data.address ));
+          dispatch(updateNeighbour(data.neighbour));
+          
+          toast.success("Form data loaded successfully");
+        } catch (error) {
+          console.error("Error loading form data:", error);
+          toast.error("Failed to load form data");
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+    loadFormData();
+  }, [id, dispatch]);
 
   const steps = [
-    { number: 1, title: "Basic", isCompleted: currentStep > 0, isActive: currentStep === 0 },
-    { number: 2, title: "Education", isCompleted: currentStep > 1, isActive: currentStep === 1 },
-    { number: 3, title: "Aadhaar", isCompleted: currentStep > 2, isActive: currentStep === 2 },
-    { number: 4, title: "PAN Card", isCompleted: currentStep > 3, isActive: currentStep === 3 },
-    { number: 5, title: "Address", isCompleted: currentStep > 4, isActive: currentStep === 4 },
-    { number: 6, title: "References", isCompleted: currentStep > 5, isActive: currentStep === 5 },
-    { number: 7, title: "Summary", isCompleted: currentStep > 6, isActive: currentStep === 6 },
+    { number: 1, title: "Basic", isCompleted: currentStep > 0, isActive: currentStep === 0, icon: User },
+    { number: 2, title: "Education", isCompleted: currentStep > 1, isActive: currentStep === 1, icon: GraduationCap },
+    { number: 3, title: "Aadhaar", isCompleted: currentStep > 2, isActive: currentStep === 2, icon: CreditCard },
+    { number: 4, title: "PAN Card", isCompleted: currentStep > 3, isActive: currentStep === 3, icon: FileText },
+    { number: 5, title: "Address", isCompleted: currentStep > 4, isActive: currentStep === 4, icon: Home },
+    { number: 6, title: "References", isCompleted: currentStep > 5, isActive: currentStep === 5, icon: Users },
+    { number: 7, title: "Summary", isCompleted: currentStep > 6, isActive: currentStep === 6, icon: ClipboardCheck },
   ];
 
   const stepTitles = [
@@ -68,6 +102,28 @@ const Index = () => {
     <SummaryStep key="summary" />,
   ];
 
+  const handleSubmit = async() => {
+    const formData = convertToFormData(formState);
+
+// Example POST API call
+try {
+  const response = await fetch("/api/onboarding", {
+    method: "POST",
+    body: formData, // directly send FormData
+    // ❗️No need to set Content-Type header manually — 
+    // fetch automatically sets the right multipart boundary
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! Status: ${response.status}`);
+  }
+
+  const result = await response.json();
+  console.log("✅ Upload success:", result);
+} catch (error) {
+  console.error("❌ Upload failed:", error);
+}
+  }
   const handleNext = () => {
     // if (currentStep < 6) {
     //   dispatch(nextStep());
@@ -86,9 +142,11 @@ const Index = () => {
               });
               return;
             }
+            updateAwignFormData(`/${id}`, formState)
             dispatch(nextStep());
             window.scrollTo({ top: 0, behavior: 'smooth' });
           } else {
+            handleSubmit();
             toast.success("🎉 Form submitted successfully!", {
               description: "We'll review your application and get back to you soon.",
             });
@@ -116,9 +174,28 @@ const Index = () => {
 
 }
 
-// useEffect(() => {
-//   window.scrollTo({ top: 0, behavior: "smooth" });
-// },[currentStep])
+useEffect(() => {
+  if(id){
+    getAwignFormData(`/${id}`)
+    .then((data) => {
+          dispatch(updateRole({ selectedRole: data?.selectedRole }));
+          dispatch(setHasSelectedRole(true));
+          dispatch(updateBasicDetails(data?.basicDetails ));
+          dispatch(updateQualification(data?.qualification));
+          dispatch(updateAadhaar(data?.aadhaar ));
+          dispatch(updatePanCard(data?.panCard ));
+          dispatch(updateAddress(data?.address ));
+          dispatch(updateNeighbour(data?.neighbour));
+    }).catch((error) => {
+      console.error("Error loading form data:", error);
+      toast.error("Failed to load form data");
+    });
+  }
+  if( currentStep && currentStep > 0){
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  // window.scrollTo({ top: 0, behavior: "smooth" });
+},[currentStep])
 
   const handleBack = () => {
     dispatch(prevStep());
@@ -130,6 +207,9 @@ const Index = () => {
       description: "Your changes have been saved successfully.",
     });
   };
+    if (!hasSelectedRole) {
+    return <RoleSelection />;
+  }
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -148,29 +228,50 @@ const Index = () => {
       </div>
 
       {/* Modern Header */}
-      <header className="relative border-b border-border/50 backdrop-blur-xl bg-card/50">
+      {/* <header className="relative border-b border-border/50 backdrop-blur-xl bg-card/50">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center shadow-glow">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
+            <div className="flex items-center gap-1">
+            <img src={AwignLogo} height={"50px"} width={50} alt="Awign Logo" />
+
               <div>
                 <h1 className="text-2xl font-bold gradient-text">Awign Onboarding Interface</h1>
                 <p className="text-sm text-muted-foreground">Complete your registration</p>
               </div>
             </div>
-            <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary/50 border border-border">
+            {/* <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary/50 border border-border">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
               <span className="text-sm font-medium text-muted-foreground">Auto-saving</span>
+            </div> *
+          </div>
+        </div>
+      </header> */}
+        
+        <header className="relative border-b border-border/50 backdrop-blur-xl bg-card/50 sticky top-0 z-30">
+        <div className="container mx-2 px-6 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1">
+             <img src={AwignLogo} height={"50px"} width={50} alt="Awign Logo" />
+              <div>
+                <h1 className="text-2xl font-bold gradient-text">Awign Onboarding Interface</h1>
+                <p className="text-sm text-muted-foreground">Complete your registration</p>
+              </div>
             </div>
+            {/* <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary/50 border border-border">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-sm font-medium text-muted-foreground">Auto-saving</span>
+            </div> */}
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
-        {/* Stepper */}
-        <FormStepper steps={steps}  onStepClick={handleStepClick}/>
+         <div className="container mx-auto px-4 py-8 max-w-8xl">
+        <div className="flex gap-8">
+          {/* Vertical Stepper Sidebar (Desktop) - Scrollable */}
+          <FormStepper steps={steps} onStepClick={handleStepClick} />
+
+          {/* Form Content */}
+          <div className="flex-1 min-w-0">
 
         {/* Form Card */}
         <Card className="shadow-modern border-2 border-border/50 rounded-3xl overflow-hidden backdrop-blur-xl bg-card/80 animate-scale-in">
@@ -193,7 +294,9 @@ const Index = () => {
           </div>
 
           {/* Card Content */}
-          <div className="p-8 space-y-6">{stepComponents[currentStep]}</div>
+          <div className="p-8 space-y-6">
+            {stepComponents[currentStep]}
+          </div>
         </Card>
 
         {/* Navigation Buttons */}
@@ -242,15 +345,13 @@ const Index = () => {
           </Button>
         </div>
 
-        {/* Progress Info */}
-        <div className="mt-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            Progress:{" "}
-            <span className="font-semibold gradient-text">
-              {Math.round(((currentStep + 1) / steps.length) * 100)}%
-            </span>{" "}
-            complete
-          </p>
+            {/* Progress Info */}
+            <div className="mt-8 text-center">
+              <p className="text-sm text-muted-foreground">
+                Progress: <span className="font-semibold gradient-text">{Math.round(((currentStep + 1) / steps.length) * 100)}%</span> complete
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

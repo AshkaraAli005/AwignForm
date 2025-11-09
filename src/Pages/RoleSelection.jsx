@@ -3,28 +3,29 @@ import { Card } from "../Components/Ui/card";
 import { cn } from "../lib/utils";
 import { useAppDispatch, useAppSelector } from "../Store/hooks";
 import { updateRole, setHasSelectedRole } from "../Store/formSlice";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PreSteps from "./PreSteps";
+import AwignLogo from "../assets/AwignLogo.png";
 
 const roles = [
   {
     id: "employee",
-    title: "Exam Lab Inviginator",
-    description: "Join as a full-time or part-time employee",
+    title: "Exam Lab Invigilator",
+    description: "Monitor exams and ensure fair, secure test conduct.",
     icon: UserCheck,
     gradient: "from-blue-500 to-cyan-500",
   },
   {
     id: "contractor",
     title: "System Operator",
-    description: "Work on project-based assignments",
+    description: "Manage exam systems and provide on-site technical support.",
     icon: Briefcase,
     gradient: "from-purple-500 to-pink-500",
   },
   {
     id: "consultant",
     title: "Support Staff",
-    description: "Provide expert advice and guidance",
+    description: "Assist candidates and maintain smooth exam operations.",
     icon: Building2,
     gradient: "from-orange-500 to-red-500",
   },
@@ -37,10 +38,7 @@ const RoleSelection = () => {
 
 
     // If pre-steps not completed, redirect to pre-steps
-    if (!hasCompletedPreSteps) {
-        return <PreSteps />;
-      }
-    
+
 
   const handleRoleSelect = (roleId) => {
     setSelectedRole(roleId);
@@ -49,6 +47,15 @@ const RoleSelection = () => {
       dispatch(setHasSelectedRole(true));
     }, 300);
   };
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  },[hasCompletedPreSteps])
+
+  if (!hasCompletedPreSteps) {
+    return <PreSteps />;
+  }
+
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -69,10 +76,11 @@ const RoleSelection = () => {
       {/* Header */}
       <header className="relative border-b border-border/50 backdrop-blur-xl bg-card/50">
         <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center shadow-glow">
-              <Sparkles className="w-6 h-6 text-white" />
-            </div>
+          <div className="flex items-center gap-1">
+            {/* <div className="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center shadow-glow"> */}
+              {/* <Sparkles className="w-6 h-6 text-white" /> */}
+              <img src={AwignLogo} height={50} width={50} alt="Awign Logo"/>
+            {/* </div> */}
             <div>
               <h1 className="text-2xl font-bold gradient-text"> Awign Onboarding Interface</h1>
               <p className="text-sm text-muted-foreground">Select your role to begin</p>

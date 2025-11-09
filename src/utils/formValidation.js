@@ -32,7 +32,7 @@ export const validateStep = (step, formState) => {
         return !!(
           formState.panCard.panCardNumber &&
           formState.panCard.panCardFrontPhoto &&
-          formState.panCard.panCardBackPhoto
+          formState.panCard.passingCertificate
         );
   
       case 4: // Address

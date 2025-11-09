@@ -137,6 +137,9 @@ const AddressStep = () => {
         label="Upload Permanent Address Proof (Minimum Last 10 Years Address proof)"
         required
         value={address.addressProofFile}
+        multiple={true}
+        validationType="document"
+        accept="image/*,.pdf"
         onFileSelect={(file) =>
           dispatch(updateAddress({ addressProofFile: file }))
         }
@@ -159,7 +162,7 @@ const AddressStep = () => {
             dispatch(updateAddress({ permanentSameAsCurrent: value }))
           }
         >
-          <SelectTrigger className="bg-background">
+          <SelectTrigger className=" data-[placeholder]:text-gray-400">
             <SelectValue placeholder="Select option" />
           </SelectTrigger>
           <SelectContent>

@@ -8,9 +8,13 @@ import { setHasCompletedPreSteps } from "../Store/formSlice";
 import { toast } from "sonner";
 import { cn } from "../lib/utils";
 import { useState } from "react";
+import AwignLogo from "../assets/AwignLogo.png";
+import api, { createAwignForm } from "../services/api";
+import { useNavigate } from "react-router-dom";
 
 const PreSteps = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const onboardingChannel = useAppSelector((state) => state.form.onboardingChannel);
   const disclaimer = useAppSelector((state) => state.form.disclaimer);
   const [currentPreStep, setCurrentPreStep] = useState(0);
@@ -32,6 +36,8 @@ const PreSteps = () => {
         });
         return;
       }
+      createAwignForm({ channel: onboardingChannel.channel });
+      navigate("/form/1324555342asdf");
       dispatch(setHasCompletedPreSteps(true));
     }
   };
@@ -63,10 +69,12 @@ const PreSteps = () => {
       {/* Header */}
       <header className="relative border-b border-border/50 backdrop-blur-xl bg-card/50">
         <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center shadow-glow">
+          <div className="flex items-center gap-1">
+            {/* <div className="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center shadow-glow">
               <Sparkles className="w-6 h-6 text-white" />
-            </div>
+            </div> */}
+            <img src={AwignLogo} height={"50px"} width={50} alt="Awign Logo" />
+            
             <div>
               <h1 className="text-2xl font-bold gradient-text">Awign Portal</h1>
               <p className="text-sm text-muted-foreground">Complete the preliminary steps</p>

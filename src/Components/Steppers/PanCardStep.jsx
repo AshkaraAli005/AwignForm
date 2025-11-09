@@ -43,10 +43,11 @@ const PanCardStep = () => {
       />
 
       <FileUpload
-        label="PAN Card Back Side Photo"
+        label="
+        Upload 10th Passing Certificate or Marks Sheet Photo"
         required
-        value={panCard.panCardBackPhoto}
-        onFileSelect={(file) => dispatch(updatePanCard({ panCardBackPhoto: file }))}
+        value={panCard.passingCertificate}
+        onFileSelect={(file) => dispatch(updatePanCard({ passingCertificate: file }))}
       />
     </div>
   );

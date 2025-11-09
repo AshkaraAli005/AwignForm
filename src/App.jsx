@@ -5,8 +5,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./Store/store";
-import Index from "./Pages/Index";
+// import Index from "./Pages/Index";
 import NotFound from "./Pages/NotFound";
+import KycVerticalStepper from "./Components/SampleMuiStepper";
+import IndexPre from "./Pages/indexjsBackup";
+import Index from "./Pages/Index";
 
 const queryClient = new QueryClient();
 
@@ -18,7 +21,11 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<IndexPre />} />
+            {/* <Route path="/" element={<KycVerticalStepper />} /> */}
+             <Route path="/form/new" element={<Index />} />
+            <Route path="/form/:id" element={<Index />} />
+
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

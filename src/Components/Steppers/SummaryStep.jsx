@@ -12,6 +12,8 @@ import {
   Home,
   Users,
   AlertTriangle,
+  Eye,
+  FileCheck,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../../Store/hooks";
 import { Card,CardContent, CardHeader, CardTitle  } from "../../Components/Ui/card";
@@ -67,7 +69,7 @@ console.log("formdata",formData);
     // },
   ];
 
-    const basicVerifications = [
+    const verifications = [
     {
       field: "Full Name",
       value: formData.basicDetails.fullName,
@@ -83,6 +85,40 @@ console.log("formdata",formData);
       match: formData.basicDetails.dateOfBirth === "1990-05-15",
       matchPercentage: 100,
       document: "PAN Card",
+    },
+        {
+      field: "Aadhaar Number",
+      value: formData.aadhaar.aadhaarNumber,
+      documentValue: "432112345632",
+      match: formData.aadhaar.aadhaarNumber?.toUpperCase() === "432112345632",
+      matchPercentage: 92,
+      document: "PAN Card Image",
+    },
+  ];
+      const basicVerifications = [
+    {
+      field: "Full Name",
+      value: formData.basicDetails.fullName,
+      documentValue: "John Michael Doe",
+      match: formData.basicDetails.fullName.toLowerCase().includes("john"),
+      matchPercentage: 95,
+      document: "Aadhaar Card",
+    },
+    {
+      field: "Date of Birth",
+      value: formData.basicDetails.dateOfBirth,
+      documentValue: "1990-05-15",
+      match: formData.basicDetails.dateOfBirth === "1990-05-15",
+      matchPercentage: 100,
+      document: "PAN Card",
+    },
+        {
+      field: "Aadhaar Number",
+      value: formData.aadhaar.aadhaarNumber,
+      documentValue: "432112345632",
+      match: formData.aadhaar.aadhaarNumber?.toUpperCase() === "432112345632",
+      matchPercentage: 92,
+      document: "PAN Card Image",
     },
   ];
 
@@ -108,7 +144,7 @@ console.log("formdata",formData);
           <Button
             variant="outline"
             size="sm"
-            onClick={() => {dispatch(setCurrentStep(stepNumber));dispatch(updateFromEditClick(true));}}
+            onClick={() => {dispatch(setCurrentStep(stepNumber));dispatch(updateFromEditClick(true)); window.scrollTo({ top: 0, behavior: 'smooth' });}}
             className="gap-2 hover:bg-primary/10"
           >
             <Pencil className="w-4 h-4" />
@@ -131,12 +167,15 @@ console.log("formdata",formData);
 
   const FilePreview = ({ label, file }) => {
     if (!file) return null;
-
-    const isImage = file.type.startsWith("image/");
-    const fileUrl = URL.createObjectURL(file);
+    let isMultipleFiles = false;
+    if(Array.isArray(file)){
+      isMultipleFiles = true;
+    }
+    const isImage = !isMultipleFiles && file.type.startsWith("image/");
+    const fileUrl = !isMultipleFiles && URL.createObjectURL(file);
 
     return (
-      <div className="space-y-2">
+      !isMultipleFiles ?<div className="space-y-2">
         <span className="text-sm font-semibold text-foreground">{label}</span>
         <div
           className="relative group cursor-pointer rounded-xl border-2 border-border/50 hover:border-primary/50 transition-all overflow-hidden bg-secondary/30 hover:shadow-lg"
@@ -159,14 +198,48 @@ console.log("formdata",formData);
               <p className="text-sm font-medium text-foreground">{file.name}</p>
             </div>
           )}
-          <div className="p-3 bg-background/80 backdrop-blur-sm border-t border-border/50">
+          <div className="p-3 rounded-b-md bg-background/80 backdrop-blur-sm border-t border-border/50">
             <p className="text-xs text-muted-foreground truncate">{file.name}</p>
             <p className="text-xs text-muted-foreground">
               {(file.size / 1024).toFixed(2)} KB
             </p>
           </div>
         </div>
-      </div>
+      </div> :  
+       <div className="space-y-2">
+          {file.map((f, index) => (
+            
+            <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 border border-border/50">
+              <div className="flex items-center gap-2">
+                {f.type.startsWith("image/") ?
+                 <div className="relative group">
+                      <img
+                        src={URL.createObjectURL(f)}
+                        alt="Preview"
+                        className="w-20 h-20 object-cover rounded-xl shadow-md ring-2 ring-primary/20"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-xl transition-colors" />
+                    </div>: 
+                    <div className="w-20 h-20 rounded-xl gradient-primary flex items-center justify-center shadow-md">
+                      <FileCheck className="w-8 h-8 text-white" />
+                </div>}
+                <div>
+                  <p className="text-sm font-medium">{label} {file.length > 1 ? `(${index + 1}/${file.length})` : ''}</p>
+                  <p className="text-xs text-muted-foreground">{f.name}</p>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() =>  setPreviewImage(URL.createObjectURL(f))}
+                className="h-8 gap-1"
+              >
+                <Eye className="w-3 h-3" />
+                Preview
+              </Button>
+            </div>
+          ))}
+        </div>
     );
   };
 
@@ -284,14 +357,7 @@ console.log("formdata",formData);
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <Alert className="border-primary/50 bg-primary/5 shadow-sm">
-        <CheckCircle2 className="h-5 w-5 text-primary" />
-        <AlertTitle className="text-lg font-bold">Review Your Information</AlertTitle>
-        <AlertDescription className="text-sm">
-          Please review all your information carefully before submitting. You can edit any section
-          by clicking the edit button.
-        </AlertDescription>
-      </Alert>
+
 
       <Dialog open={!!previewImage} onOpenChange={() => setPreviewImage(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
@@ -303,67 +369,80 @@ console.log("formdata",formData);
           )}
         </DialogContent>
       </Dialog>
+      {verifications.some(v => !v.match) && (
+  <Card className="p-6 border-2 border-orange-500/50 backdrop-blur-xl bg-orange-500/5">
+    <div className="flex items-center gap-3 mb-4">
+      <AlertTriangle className="w-6 h-6 text-orange-500" />
+      <h3 className="text-lg font-bold">Fields Requiring Attention</h3>
+    </div>
 
-      {/* Document Verification Requirements */}
-      <Card className="border-2 border-blue-500/50 bg-blue-500/5">
-        <CardHeader>
-          <div className="flex items-start gap-4 align-middle">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg flex-shrink-0">
-              <AlertTriangle className="w-6 h-6 text-white" />
+    <div className="space-y-4">
+      {verifications.filter(v => !v.match).map((v, i) => {
+        const getFieldSection = (fieldName) => {
+          const lower = fieldName.toLowerCase();
+
+          if (lower.includes("full name")) {
+            return { ref: basicDetailsRef, sectionId: "basic", fieldKey: "fullName" };
+          }
+          if (lower.includes("date of birth") || lower.includes("dob")) {
+            return { ref: basicDetailsRef, sectionId: "basic", fieldKey: "dateOfBirth" };
+          }
+          if (lower.includes("pan")) {
+            return { ref: panCardRef, sectionId: "panCard", fieldKey: "panCardNumber" };
+          }
+
+          return { ref: basicDetailsRef, sectionId: "basic", fieldKey: "fullName" };
+        };
+
+        const fieldSection = getFieldSection(v.field);
+
+        const scrollToField = () => {
+          if (fieldSection.ref.current) {
+            fieldSection.ref.current.scrollIntoView({ behavior: "smooth", block: "center" });
+            setHighlightedSection(`${fieldSection.sectionId}-${fieldSection.fieldKey}`);
+          }
+        };
+
+        return (
+          <div
+            key={i}
+            className="p-4 rounded-xl bg-card border border-border cursor-pointer hover:border-primary/50 transition-all"
+            // onClick={scrollToField}
+          >
+            <div className="flex items-start justify-between mb-2">
+              <div>
+                <p className="font-semibold">{v.field}</p>
+                <p className="text-sm text-muted-foreground">From {v.document}</p>
+                <p className="text-xs text-primary mt-1">Click to edit</p>
+              </div>
+              {/* <Badge variant="outline" className="border-orange-500 text-orange-500">
+                {v.matchPercentage}% match
+              </Badge> */}
             </div>
-            <div className="flex-1">
-              <CardTitle className="text-xl font-bold text-blue-700 dark:text-blue-400">
-                Document Verification Requirements
-              </CardTitle>
+
+            <Separator className="my-3" />
+
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-muted-foreground mb-1">You entered:</p>
+                <p className="font-semibold">{v.value}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground mb-1">Document shows:</p>
+                <p className="font-semibold">{v.documentValue}</p>
+              </div>
             </div>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2 text-sm text-muted-foreground">
-            <p className="flex items-start gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></span>
-              <span>
-                The <strong>name</strong> and <strong>father's name</strong> must exactly match the
-                provided ID card, maintaining the same sequence, order, and spacing (first, middle,
-                and last names should be identical).
-              </span>
-            </p>
-            <p className="flex items-start gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></span>
-              <span>
-                <strong>Date of Birth (DOB)</strong> must match the ID card.
-              </span>
-            </p>
-            <p className="flex items-start gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></span>
-              <span>
-                <strong>Father's name</strong> is mandatory on the ID card.
-              </span>
-            </p>
-            <p className="flex items-start gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></span>
-              <span>
-                <strong>Signature</strong> is mandatory on the ID card.
-              </span>
-            </p>
-            <p className="flex items-start gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></span>
-              <span>
-                <strong>DOB</strong> must be mentioned on the ID card.
-              </span>
-            </p>
-            <p className="flex items-start gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0"></span>
-              <span>
-                Document image quality should be <strong>clear and legible</strong>.
-              </span>
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+        );
+      })}
+    </div>
+  </Card>
+)}
+
+
 
       <Section title="Basic Details" icon={User} stepNumber={0}>
-        {getVerificationRes(basicVerifications)}
+        {/* {getVerificationRes(basicVerifications)} */}
          <Separator className="my-3" />
         <Field label="Full Name" value={form.basicDetails.fullName} />
         <Field label="Mobile number" value={form.basicDetails.mobileNumber} />
@@ -397,13 +476,13 @@ console.log("formdata",formData);
       </Section>
 
       <Section title="PAN Card Details" icon={CreditCard} stepNumber={3}>
-        {getVerificationRes(panVerifications)}
+        {/* {getVerificationRes(panVerifications)} */}
         <Field label="PAN Card Number" value={form.panCard.panCardNumber} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
           <FilePreview label="PAN Card Front Side Photo" file={form.panCard.panCardFrontPhoto} />
           <FilePreview
             label="PAN Card Back Side Photo"
-            file={form.panCard.panCardBackPhoto}
+            file={form.panCard.passingCertificate}
           />
         </div>
       </Section>

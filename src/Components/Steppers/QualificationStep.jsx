@@ -12,18 +12,21 @@ const QualificationStep = () => {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
+      <div>
         <Label className="flex items-center gap-2 text-sm font-medium">
-          <div className="w-6 h-6 rounded bg-[hsl(var(--form-icon-bg))] text-[hsl(var(--form-icon-text))] flex items-center justify-center">
-            <GraduationCap className="w-4 h-4" />
-          </div>
+           <div className="w-8 h-8 rounded-xl gradient-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+          <GraduationCap className="w-4 h-4 text-white" />
+        </div>
           Highest Education
           <span className="text-destructive ml-1">*</span>
         </Label>
+      </div>
+
         <Select
           value={qualification.highestEducation}
           onValueChange={(value) => dispatch(updateQualification({ highestEducation: value }))}
         >
-          <SelectTrigger className="bg-background">
+          <SelectTrigger className="data-[placeholder]:text-gray-400">
             <SelectValue placeholder="Select highest education" />
           </SelectTrigger>
           <SelectContent>
@@ -37,21 +40,24 @@ const QualificationStep = () => {
       </div>
 
       <div className="space-y-2">
+        <div>
         <Label className="flex items-center gap-2 text-sm font-medium">
-          <div className="w-6 h-6 rounded bg-[hsl(var(--form-icon-bg))] text-[hsl(var(--form-icon-text))] flex items-center justify-center">
-            <FileCheck className="w-4 h-4" />
-          </div>
+           <div className="w-8 h-8 rounded-xl gradient-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+          <FileCheck className="w-4 h-4 text-white" />
+        </div>
           Graduation Category
           <span className="text-destructive ml-1">*</span>
         </Label>
-        <p className="text-xs text-muted-foreground">
+         <p className="text-xs text-muted-foreground leading-relaxed pl-10">
           Choose the highest certification that you have accomplished.
         </p>
+      </div>
+
         <Select
           value={qualification.graduationCategory}
           onValueChange={(value) => dispatch(updateQualification({ graduationCategory: value }))}
         >
-          <SelectTrigger className="bg-background">
+          <SelectTrigger className="data-[placeholder]:text-gray-400">
             <SelectValue placeholder="Select graduation category" />
           </SelectTrigger>
           <SelectContent>

@@ -45,7 +45,7 @@ const OnboardingChannelStep = () => {
             dispatch(updateOnboardingChannel({ channel: value }))
           }
         >
-          <SelectTrigger className="bg-background">
+          <SelectTrigger className="data-[placeholder]:text-gray-400">
             <SelectValue placeholder="Select onboarding channel" />
           </SelectTrigger>
           <SelectContent className="bg-background z-50">
