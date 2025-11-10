@@ -125,12 +125,12 @@ export const validationRules = {
                               From {v.document}
                             </p>
                           </div>
-                          <Badge
+                          {/* <Badge
                             variant="outline"
                             className="border-orange-500 text-orange-500"
                           >
                             {v.matchPercentage}% match
-                          </Badge>
+                          </Badge> */}
                         </div>
                         <Separator className="my-3" />
                         <div className="grid grid-cols-2 gap-4 text-sm">
@@ -197,9 +197,10 @@ export const convertToFormData = (data, formData = new FormData(), parentKey = "
 
 export const FilePreview = ({ label, file, handleViewClick, handleRemove }) => {
   if (!file) return null;
+  if (Object.keys(file).length === 0) return null;
 
-  const isImage = file.type.startsWith("image/");
-  const fileUrl = URL.createObjectURL(file);
+  const isImage = file?.type?.startsWith("image/");
+  const fileUrl = URL?.createObjectURL(file);
 
   return (
     <div className="space-y-2">
@@ -249,4 +250,34 @@ export const FilePreview = ({ label, file, handleViewClick, handleRemove }) => {
 
     </div>
   );
+};
+
+export const validateEmail = (email) => {
+  if (!email || email.trim() === "") {
+    return "Email is required.";
+  }
+
+  // Basic email regex pattern (can be adjusted if needed)
+  const emailRegex =
+    /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  if (!emailRegex.test(email.trim())) {
+    return "Please enter a valid email address (e.g., johndoe@example.com).";
+  }
+
+  return ""; // ✅ no error
+};
+
+export const validatePanCard = (pan) => {
+  if (!pan || pan.trim() === "") {
+    return "PAN card number is required.";
+  }
+
+  const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+
+  if (!panRegex.test(pan.toUpperCase())) {
+    return "Please enter a valid PAN card number (e.g., ABCDE1234F).";
+  }
+
+  return ""; // ✅ no error
 };

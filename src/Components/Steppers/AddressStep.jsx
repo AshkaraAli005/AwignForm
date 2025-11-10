@@ -25,9 +25,14 @@ const AddressStep = () => {
   const dispatch = useAppDispatch();
   const address = useAppSelector((state) => state.form.address);
   const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
+    const [isCurrentAddressDialogOpen, setIsCurrentAddressDialogOpen] = useState(false);
+
 
   const handleSaveAddress = () => {
     setIsAddressDialogOpen(false);
+  };
+   const handleSaveCurrentAddress = () => {
+    setIsCurrentAddressDialogOpen(false);
   };
 
   return (
@@ -171,6 +176,125 @@ const AddressStep = () => {
           </SelectContent>
         </Select>
       </div>
+      {address.permanentSameAsCurrent === "no" && (
+        <div className="space-y-4 border-t border-border/50 pt-6">
+          <h3 className="text-lg font-semibold text-foreground">
+            Current Address Details
+          </h3>
+
+          {/* Dialog for Current Address */}
+          <Dialog
+            open={isCurrentAddressDialogOpen}
+            onOpenChange={setIsCurrentAddressDialogOpen}
+          >
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="text-primary border-primary hover:bg-primary/10"
+              >
+                Fill Current Address Details &gt;
+              </Button>
+            </DialogTrigger>
+
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Current Address Details</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <FormField
+                  icon={Home}
+                  label="House number"
+                  required
+                  value={address.currentHouseNumber}
+                  onChange={(value) =>
+                    dispatch(updateAddress({ currentHouseNumber: value }))
+                  }
+                />
+                <FormField
+                  icon={MapPin}
+                  label="Street name"
+                  required
+                  value={address.currentStreetName}
+                  onChange={(value) =>
+                    dispatch(updateAddress({ currentStreetName: value }))
+                  }
+                />
+                <FormField
+                  icon={MapPin}
+                  label="Locality"
+                  required
+                  value={address.currentLocality}
+                  onChange={(value) =>
+                    dispatch(updateAddress({ currentLocality: value }))
+                  }
+                />
+                <FormField
+                  icon={MapPin}
+                  label="Landmark"
+                  required
+                  value={address.currentLandmark}
+                  onChange={(value) =>
+                    dispatch(updateAddress({ currentLandmark: value }))
+                  }
+                />
+                <FormField
+                  icon={MapPin}
+                  label="District"
+                  required
+                  value={address.currentDistrict}
+                  onChange={(value) =>
+                    dispatch(updateAddress({ currentDistrict: value }))
+                  }
+                />
+                <FormField
+                  icon={MapPin}
+                  label="State"
+                  required
+                  value={address.currentState}
+                  onChange={(value) =>
+                    dispatch(updateAddress({ currentState: value }))
+                  }
+                />
+                <FormField
+                  icon={Hash}
+                  label="Pincode"
+                  required
+                  type="text"
+                  value={address.currentPincode}
+                  onChange={(value) =>
+                    dispatch(updateAddress({ currentPincode: value }))
+                  }
+                />
+                <Button onClick={handleSaveCurrentAddress} className="w-full">
+                  Save Current Address
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* ✅ Show saved current address summary */}
+          {address.currentHouseNumber && (
+            <p className="text-sm text-muted-foreground mt-2">
+              {address.currentHouseNumber}, {address.currentStreetName},{" "}
+              {address.currentLocality}, {address.currentDistrict},{" "}
+              {address.currentState} - {address.currentPincode}
+            </p>
+          )}
+
+          {/* ✅ Current Address Proof */}
+          <FileUpload
+            label="Upload Current Address Proof"
+            required
+            value={address.currentAddressProofFile}
+            multiple={true}
+            validationType="document"
+            accept="image/*,.pdf"
+            onFileSelect={(file) =>
+              dispatch(updateAddress({ currentAddressProofFile: file }))
+            }
+          />
+        </div>
+      )}
     </div>
   );
 };

@@ -11,11 +11,11 @@ import NeighbourStep from "../Components/Steppers/NeighboursStep";
 import SummaryStep from "../Components/Steppers/SummaryStep";
 import RoleSelection from "./RoleSelection";
 import { useAppDispatch, useAppSelector } from "../Store/hooks";
-import { nextStep, prevStep,setCurrentStep, setHasSelectedRole } from "../Store/formSlice";
+import { nextStep, prevStep,setCurrentStep, setHasSelectedRole, updateAadhaar, updateAddress, updateBasicDetails, updateNeighbour, updatePanCard, updateQualification } from "../Store/formSlice";
 import { toast } from "../Components/Ui/sonner";
 import { cn } from "../lib/utils";
 import { getStepValidationMessage, validateStep } from "../utils/formValidation";
-import { useEffect } from "react";
+import { use, useEffect, useState } from "react";
 import { convertToFormData } from "../utils/commonFunctions";
 import AwignLogo from "../assets/AwignLogo.png";
 import { useNavigate, useParams } from "react-router-dom";
@@ -29,38 +29,38 @@ const Index = () => {
   const hasSelectedRole = useAppSelector((state) => state.form.hasSelectedRole);
   const formState = useAppSelector((state) => state.form);
 
+  const [isLoading, setIsLoading] = useState(false);
+
   // If role not selected, show role selection screen
 
 
-    useEffect(() => {
-    const loadFormData = async () => {
-      console.log(id);
-      if (id && id !== 'new') {
-        setIsLoading(true);
-        try {
-          const data = await getFormById(id);
-          
-          // Load data into Redux store
-          dispatch(updateRole({ selectedRole: data.selectedRole }));
-          dispatch(setHasSelectedRole(true));
-          dispatch(updateBasicDetails(data.basicDetails ));
-          dispatch(updateQualification(data.qualification));
-          dispatch(updateAadhaar(data.aadhaar ));
-          dispatch(updatePanCard(data.panCard ));
-          dispatch(updateAddress(data.address ));
-          dispatch(updateNeighbour(data.neighbour));
-          
-          toast.success("Form data loaded successfully");
-        } catch (error) {
-          console.error("Error loading form data:", error);
-          toast.error("Failed to load form data");
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-    loadFormData();
-  }, [id, dispatch]);
+  //   useEffect(() => {
+  //   const loadFormData = () => {
+  //     if (id && id !== 'new') {
+  //       setIsLoading(true);
+  //       getAwignFormData(`/${id}`)
+  //       .then((res) => {
+  //         let data = res.data;
+  //         // Load data into Redux store
+  //         dispatch(setCurrentStep(data.currentStep));
+  //         dispatch(updateRole({ selectedRole: data.selectedRole }));
+  //         dispatch(setHasSelectedRole(true));
+  //         dispatch(updateBasicDetails(data.basicDetails ));
+  //         dispatch(updateQualification(data.qualification));
+  //         dispatch(updateAadhaar(data.aadhaar ));
+  //         dispatch(updatePanCard(data.panCard ));
+  //         dispatch(updateAddress(data.address ));
+  //         dispatch(updateNeighbour(data.neighbour));
+  //       }).catch((error) => {
+  //         console.error("Error loading form data:", error);
+  //         toast.error("Failed to load form data");
+  //       }).finally(() => {
+  //         setIsLoading(false);
+  //       })
+  //     }
+  //   };
+  //   loadFormData();
+  // }, [id, dispatch]);
 
   const steps = [
     { number: 1, title: "Basic", isCompleted: currentStep > 0, isActive: currentStep === 0, icon: User },
@@ -136,12 +136,12 @@ try {
 
         // Validate current step before proceeding
         if (currentStep < 6) {
-            if (!validateStep(currentStep, formState)) {
-              toast.error("Missing Required Fields", {
-                description: getStepValidationMessage(currentStep),
-              });
-              return;
-            }
+            // if (!validateStep(currentStep, formState)) {
+            //   toast.error("Missing Required Fields", {
+            //     description: getStepValidationMessage(currentStep),
+            //   });
+            //   return;
+            // }
             updateAwignFormData(`/${id}`, formState)
             dispatch(nextStep());
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -177,8 +177,9 @@ try {
 useEffect(() => {
   if(id){
     getAwignFormData(`/${id}`)
-    .then((data) => {
-          dispatch(updateRole({ selectedRole: data?.selectedRole }));
+    .then((res) => {
+          let data = res.data;
+          // dispatch(updateRole({ selectedRole: data?.selectedRole }));
           dispatch(setHasSelectedRole(true));
           dispatch(updateBasicDetails(data?.basicDetails ));
           dispatch(updateQualification(data?.qualification));
@@ -196,6 +197,13 @@ useEffect(() => {
   }
   // window.scrollTo({ top: 0, behavior: "smooth" });
 },[currentStep])
+
+console.log(formState)
+useEffect(() => {
+  if(id){
+    dispatch(setHasSelectedRole(true));
+  }
+}, []);
 
   const handleBack = () => {
     dispatch(prevStep());
@@ -268,7 +276,10 @@ useEffect(() => {
          <div className="container mx-auto px-4 py-8 max-w-8xl">
         <div className="flex flex-col gap-1 lg:flex-row lg:gap-8">
           {/* Vertical Stepper Sidebar (Desktop) - Scrollable */}
-          <FormStepper steps={steps} onStepClick={handleStepClick} />
+          {/* <FormStepper steps={steps} onStepClick={handleStepClick} /> */}
+              {/* <div className="lg:w-1/4 w-full lg:sticky lg:top-[100px] self-start"> */}
+      <FormStepper steps={steps} onStepClick={handleStepClick} />
+    {/* </div> */}
 
           {/* Form Content */}
           <div className="flex-1 min-w-0">

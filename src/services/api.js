@@ -35,11 +35,11 @@ export const updateAwignFormData = (endpoint, data, config = {}) => {
   return apiRequest("patch", endpoint, data, config);
 };
 
-export const uploadAwignaFile = (endpoint, file, config = {}) => {
+export const uploadAwignaFile = (endpoint, file, name = "file" , config = {}) => {
   const formData = new FormData();
-  formData.append("file", file);
+  formData.append(name, file);
 
-  return apiRequest("post", endpoint, formData, { 
+  return apiRequest("patch", `/${endpoint}`, formData, { 
     headers: { "Content-Type": "multipart/form-data" },
     ...config,
   });

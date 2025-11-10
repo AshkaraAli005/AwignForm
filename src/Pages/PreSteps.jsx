@@ -36,8 +36,12 @@ const PreSteps = () => {
         });
         return;
       }
-      createAwignForm({ channel: onboardingChannel.channel });
-      navigate("/form/1324555342asdf");
+      createAwignForm({onboardingChannel:{ channel: onboardingChannel.channel} }).then((res) => {
+        console.log(res);
+        navigate(`/form/${res?.reference_id}`);
+      }).catch((err) => {
+        console.log(err);
+      });
       dispatch(setHasCompletedPreSteps(true));
     }
   };

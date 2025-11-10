@@ -57,7 +57,7 @@ const FileUpload = ({
     // Generate previews for images
     const newPreviews = [];
     fileArray.forEach((file) => {
-      if (file.type.startsWith("image/")) {
+      if (file?.type?.startsWith("image/")) {
         const reader = new FileReader();
         reader.onloadend = () => {
           newPreviews.push(reader.result);
@@ -108,7 +108,7 @@ const FileUpload = ({
       // Generate previews for existing files
       const newPreviews = [];
       files.forEach((file) => {
-        if (file.type.startsWith('image/')) {
+        if (file?.type?.startsWith('image/')) {
           const reader = new FileReader();
           reader.onloadend = () => {
             newPreviews.push(reader.result);
@@ -264,7 +264,7 @@ const FileUpload = ({
 
                       // Generate previews for new files
                       newFilesArray.forEach((file) => {
-                        if (file.type.startsWith('image/')) {
+                        if (file?.type?.startsWith('image/')) {
                           const reader = new FileReader();
                           reader.onloadend = () => {
                             setPreviews(prev => [...prev, reader.result]);

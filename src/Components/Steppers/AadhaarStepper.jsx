@@ -4,9 +4,12 @@ import FileUpload from "../FileUpload";
 import { useAppDispatch, useAppSelector } from "../../Store/hooks";
 import { updateAadhaar } from "../../Store/formSlice";
 import { useState } from "react";
+import { uploadAwignaFile } from "../../services/api";
+import { useParams } from "react-router-dom";
 
 const AadhaarStep = () => {
   const dispatch = useAppDispatch();
+  const {id} = useParams()
   const aadhaar = useAppSelector((state) => state.form.aadhaar);
 
     const [aadhaarInput, setAadhaarInput] = useState(
@@ -42,8 +45,12 @@ const AadhaarStep = () => {
         validationType="image"
         accept="image/*"
         value={aadhaar.aadhaarFrontPhoto}
-        onFileSelect={(file) =>
-          dispatch(updateAadhaar({ aadhaarFrontPhoto: file }))
+        onFileSelect={(file) =>{
+          uploadAwignaFile(id, file, "aadhaarFrontPhoto").then((response) => {
+            console.log(response);
+          })
+          // dispatch(updateAadhaar({ aadhaarFrontPhoto: file }))
+        }
         }
       />
 

@@ -16,12 +16,13 @@ import { format } from "date-fns";
 import { cn } from "../../lib/utils";
 import { useEffect, useState } from "react";
 import { validatePhone } from "../../utils/formValidation";
-import { sanitizeInput, validationRules } from "../../utils/commonFunctions";
+import { sanitizeInput, validateEmail, validationRules } from "../../utils/commonFunctions";
 
 const BasicDetailsStep = () => {
   const dispatch = useAppDispatch();
   const basicDetails = useAppSelector((state) => state.form.basicDetails);
   const [open, setOpen] = useState(false);
+
 
     const handlePhoneChange = (value) => {
     dispatch(updateBasicDetails({ mobileNumber: value }));
@@ -29,25 +30,107 @@ const BasicDetailsStep = () => {
   };
 
     const [errors, setErrors] = useState({
+    fullName: "",
     mobileNumber: "",
+    alternateMobileNumber: "",
     email: "",
+    dateOfBirth: "",
+    city: "",
+    motherName: "",
+    fatherName: "",
+    passportPhoto: "",
+    signaturePhoto: "",
   });
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   },[])
 
+    const validateField = (name, value) => {
+    let error = "";
+
+    switch (name) {
+      case "fullName":
+        if (!value.trim()) error = "Full name is required.";
+        break;
+
+      case "mobileNumber":
+        error = validatePhone(value);
+        break;
+
+      case "alternateMobileNumber":
+        if (!value.trim()) error = "Alternate mobile number is required.";
+        else if (validatePhone(value))
+          error = validatePhone(value);
+        else if (value === basicDetails.mobileNumber)
+          error = "Alternate number cannot be same as mobile number.";
+        break;
+
+      case "email":
+        // if (!value.trim()) error = "Email is required.";
+        // else if (!validationRules.email.test(value))
+          error = validateEmail(value);
+        break;
+
+      case "dateOfBirth":
+        if (!value) error = "Date of birth is required.";
+        break;
+
+      case "city":
+        if (!value) error = "Please select a city.";
+        break;
+
+      case "motherName":
+        if (!value.trim()) error = "Mother's name is required.";
+        else if (value.trim().length < 2)
+          error = "Please enter a valid name.";
+        break;
+
+      case "fatherName":
+        if (!value.trim()) error = "Father's name is required.";
+        else if (value.trim().length < 2)
+          error = "Please enter a valid name.";
+        break;
+
+      case "passportPhoto":
+        if (!value) error = "Passport photo is required.";
+        break;
+
+      case "signaturePhoto":
+        if (!value) error = "Signature photo is required.";
+        break;
+
+      default:
+        break;
+    }
+
+    setErrors((prev) => ({ ...prev, [name]: error }));
+    return error;
+  };
+
+    const handleChange = (field, value) => {
+    dispatch(updateBasicDetails({ [field]: value }));
+    validateField(field, value);
+  };
+
   return (
     <div className="space-y-6">
-      <FormField
-        icon={User}
-        label="Full Name"
-        hint="Example - Full Name - Abhishek Kumar Singh (First Name - Abhishek, Middle Name - Kumar, Last Name - Singh)"
-        required
-        value={basicDetails.fullName}
-        placeholder="Enter full name"
-        onChange={(value) => dispatch(updateBasicDetails({ fullName: sanitizeInput(value, validationRules.name) }))}
-      />
+      <div>
+        <FormField
+          icon={User}
+          label="Full Name"
+          required
+          value={basicDetails.fullName}
+          placeholder="Enter full name"
+          onChange={(value) =>
+            handleChange("fullName", sanitizeInput(value, validationRules.name))
+          }
+          hint="Example - Abhishek Kumar Singh"
+        />
+        {errors.fullName && (
+          <p className="text-red-500 text-xs pl-4 mt-1">{errors.fullName}</p>
+        )}
+      </div>
             <div>
         <FormField
           icon={Phone}
@@ -63,28 +146,38 @@ const BasicDetailsStep = () => {
           <p className="text-red-500 text-xs pl-4 mt-2">{errors.mobileNumber}</p>
         )}
       </div>
-      <FormField
-        icon={Phone}
-        label="Alternate Mobile Number"
-        hint="Do not use this mobile number for any registrations."
-        required
-        type="number"
-        value={basicDetails.alternateMobileNumber}
-        placeholder="Enter alternate mobile number"
-        onChange={(value) => dispatch(updateBasicDetails({ alternateMobileNumber: value }))}
-      />
+      <div>
+        <FormField
+          icon={Phone}
+          label="Alternate Mobile Number"
+          required
+          type="number"
+          value={basicDetails.alternateMobileNumber}
+          placeholder="Enter alternate mobile number"
+          onChange={(value) => handleChange("alternateMobileNumber", value)}
+        />
+        {errors.alternateMobileNumber && (
+          <p className="text-red-500 text-xs pl-4 mt-1">
+            {errors.alternateMobileNumber}
+          </p>
+        )}
+      </div>
 
 
-      <FormField
-        icon={Mail}
-        label="Email ID (For Registration)"
-        hint="Email ID - To be used in registration."
-        required
-        type="email"
-        value={basicDetails.email}
-        placeholder="Enter Email ID"
-        onChange={(value) => dispatch(updateBasicDetails({ email: sanitizeInput(value, validationRules.email) }))}
-      />
+      <div>
+        <FormField
+          icon={Mail}
+          label="Email ID (For Registration)"
+          required
+          type="email"
+          value={basicDetails.email}
+          placeholder="Enter Email ID"
+          onChange={(value) =>  handleChange( "email", sanitizeInput(value, validationRules.email) )}
+        />
+        {errors.email && (
+          <p className="text-red-500 text-xs pl-4 mt-1">{errors.email}</p>
+        )}
+      </div>
 
 <div className="space-y-3 group animate-fade-in">
     <div>
