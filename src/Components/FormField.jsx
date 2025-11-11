@@ -13,12 +13,12 @@ const FormField = ({
   placeholder,
 }) => {
   return (
-    <div className="space-y-3 group animate-fade-in">
+    <div className="space-y-2 group animate-fade-in">
     <div>
-      <Label className="flex items-center gap-2.5 text-sm font-semibold text-foreground">
-        <div className="w-8 h-8 rounded-xl gradient-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+      <Label className={"flex items-center gap-2.5 text-sm font-semibold text-foreground" + ( !Icon ? " ml-2" : "")}>
+        {Icon && <div className="w-8 h-8 rounded-xl gradient-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
           <Icon className="w-4 h-4 text-white" />
-        </div>
+        </div>}
         <span>{label}</span>
         {required && <span className="text-destructive text-base">*</span>}
       </Label>

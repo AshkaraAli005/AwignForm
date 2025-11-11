@@ -1,12 +1,14 @@
-import { CreditCard } from "lucide-react";
+import { useState } from "react";
+
+import { AlertTriangle, CreditCard } from "lucide-react";
 import FormField from "../FormField";
 import FileUpload from "../FileUpload";
 import { useAppDispatch, useAppSelector } from "../../Store/hooks";
 import { updateAadhaar, updateFiles, updateLoadingFiles } from "../../Store/formSlice";
-import { useState } from "react";
 import { initiateOcrExtract, uploadAwignaFile } from "../../services/api";
 import { useParams } from "react-router-dom";
 import { getVerificationRes } from "../../utils/commonFunctions";
+import { Alert, AlertDescription } from "../Ui/alert";
 
 const AadhaarStep = () => {
   const dispatch = useAppDispatch();
@@ -25,14 +27,21 @@ const AadhaarStep = () => {
     const trimmedValue = numericValue.slice(0, 12);
     const formattedValue = trimmedValue.replace(/(\d{4})(?=\d)/g, "$1 ");
     setAadhaarInput(formattedValue);
-    dispatch(updateAadhaar({ aadhaarNumber: trimmedValue }));
+    dispatch(updateAadhaar({ aadhaarNumber: formattedValue }));
   };
 
-  console.log(formData.validationsData.aadhaarValidations)
+    const isValidImage = !formData?.validationsData?.aadhaarValidations?.defaultData?.message.toLowerCase().includes("aadhaar number must be 12 digits")
 
   return (
     <div className="space-y-6">
-      {formData?.validationsData?.aadhaarValidations?.match === false && getVerificationRes([formData.validationsData.aadhaarValidations])}
+      {formData?.validationsData?.aadhaarValidations?.match === false && isValidImage && getVerificationRes([formData.validationsData.aadhaarValidations])}
+
+      { !isValidImage && <div className="border-orange-200 bg-orange-50 flex px-6 py-5 gap-3 " style={{border:"1px solid #fff7ed !important"}}>
+<AlertTriangle className="w-6 h-6 text-orange-500" />
+<div className="text-orange-800 dark:text-orange-200 font-medium">
+    Important: The uploaded file is not valid or clear . Please upload a valid image.
+</div>
+      </div>}
       <FormField
         icon={CreditCard}
         label="Aadhaar Card Number"
@@ -55,7 +64,7 @@ const AadhaarStep = () => {
           uploadAwignaFile(id, file, "aadhaarFrontPhoto").then((response) => {
             dispatch(updateFiles({aadhaarFrontPhoto: response.data.files.aadhaarFrontPhoto}));
             dispatch(updateLoadingFiles({aadhaarFrontPhoto: false}))
-            // initiateOcrExtract(id)
+            initiateOcrExtract(id)
           })
         }
         }
@@ -74,7 +83,7 @@ const AadhaarStep = () => {
           uploadAwignaFile(id, file, "aadhaarBackPhoto").then((response) => {
             dispatch(updateFiles({aadhaarBackPhoto: response.data.files.aadhaarBackPhoto}));
             dispatch(updateLoadingFiles({aadhaarBackPhoto: false}))
-            // initiateOcrExtract(id)
+            initiateOcrExtract(id)
           })
 
         }}

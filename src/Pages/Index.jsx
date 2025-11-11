@@ -124,35 +124,73 @@ try {
               return;
             }
     // Aadhaar step (step 2) special logic
-    // if (currentStep === 2) {
-    //   try {
-    //     await updateAwignFormData(`/${id}`, {
-    //       [stepMap[currentStep]]:
-    //         cleanedFormState[stepMap[currentStep]] || cleanedFormState,
-    //       currentStep: currentStep + 1,
-    //     });
+    if (currentStep === 2) {
+      try {
+        await updateAwignFormData(`/${id}`, {
+          [stepMap[currentStep]]:
+            cleanedFormState[stepMap[currentStep]] || cleanedFormState,
+          currentStep: currentStep + 1,
+        });
 
-    //     const res = await validateDataApi(id);
-    //     if (!res?.aadhaar_validation?.is_valid) {
-    //       toast.error("Aadhaar verification failed. Please try again.");
-    //       let validationsData = res?.aadhaar_validation
-    //       dispatch(updateValidationsData({aadhaarValidations: {
-    //         field: "Aadhaar Number",
-    //         value: validationsData?.user_provided,
-    //         documentValue: validationsData?.extracted,
-    //         match: validationsData?.user_provided.toUpperCase() === validationsData?.extracted,
-    //         matchPercentage: 100,
-    //         document: "Aadhaar Card Front Image",
-    //       }}));
-    //       window.scrollTo({ top: 0, behavior: 'smooth' });
-    //       return; // ✅ Stops inside this block
-    //     }else{
-    //       dispatch(updateValidationsData({aadhaarValidations: {match: true}}));a
-    //     }
-    //   } catch (error) {
-    //     toast.error("Aadhaar validation failed due to network error.");
-    //     return;
-    //   }}
+        const res = await validateDataApi(id);
+        if (res?.aadhaar_validation?.is_valid === false) {
+          toast.error("Aadhaar verification failed. Please try again.");
+          let validationsData = res?.aadhaar_validation
+          dispatch(updateValidationsData({aadhaarValidations: {
+            field: "Aadhaar Number",
+            value: validationsData?.user_provided,
+            documentValue: validationsData?.extracted,
+            match: validationsData?.user_provided.toUpperCase() === validationsData?.extracted,
+            matchPercentage: 100,
+            document: "Aadhaar Card Front Image",
+            defaultData: validationsData
+
+          }}));
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return; // ✅ Stops inside this block
+        }else{
+          dispatch(updateValidationsData({aadhaarValidations: {match: true}}));
+          dispatch(setCurrentStep(currentStep + 1));
+        }
+      } catch (error) {
+        toast.error("Aadhaar validation failed due to network error.");
+        return;
+      }
+      return
+    }
+
+      if (currentStep === 3) {
+      try {
+        await updateAwignFormData(`/${id}`, {
+          [stepMap[currentStep]]:
+            cleanedFormState[stepMap[currentStep]] || cleanedFormState,
+          currentStep: currentStep + 1,
+        });
+
+        const res = await validateDataApi(id);
+        if (res?.pan_validation?.is_valid === false) {
+          toast.error("Aadhaar verification failed. Please try again.");
+          let validationsData = res?.pan_validation
+          dispatch(updateValidationsData({pan_validation: {
+            field: "PAN Number",
+            value: validationsData?.user_provided,
+            documentValue: validationsData?.extracted,
+            match: validationsData?.user_provided.toUpperCase() === validationsData?.extracted,
+            matchPercentage: 100,
+            document: "PAN Card Image",
+            defaultData: validationsData
+          }}));
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return; // ✅ Stops inside this block
+        }else{
+          dispatch(updateValidationsData({pan_validation: {match: true}}));
+ dispatch(setCurrentStep(currentStep + 1));        }
+      } catch (error) {
+        toast.error("Aadhaar validation failed due to network error.");
+        return;
+      }
+      return
+    }
 
             
 

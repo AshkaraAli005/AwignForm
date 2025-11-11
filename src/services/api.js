@@ -36,7 +36,7 @@ export const updateAwignFormData = (endpoint, data, config = {}) => {
 };
 
 export const initiateOcrExtract = (id) => {
-  return apiRequest("post", `/ocr-extraction/${id}`);
+  return apiRequest("post", `/get_ocr_results/${id}`);
 };
 
 export const validateDataApi = (id) => {

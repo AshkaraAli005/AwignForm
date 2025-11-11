@@ -160,7 +160,7 @@ const FormStepper = ({ steps, onStepClick, stepsMobile }) => {
                         step.isActive ? "text-muted-foreground" : "text-muted-foreground/50"
                       )}
                     >
-                      Step {step.number} of {steps.length}
+                      Step {step.number}
                     </span>
                   </div>
                 </div>

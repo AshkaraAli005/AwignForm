@@ -1,3 +1,6 @@
+import { useRef } from "react";
+import { Badge } from "../Components/Ui/badge";
+import { Separator } from "../Components/Ui/separator";
 import {
   FileText,
   Image as ImageIcon,
@@ -7,9 +10,7 @@ import {
   Upload,
 } from "lucide-react";
 
-import { Badge } from "../Components/Ui/badge";
-import { Separator } from "../Components/Ui/separator";
-import { useRef, useState } from "react";
+
 
 export const isValidEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
@@ -38,16 +39,8 @@ export const validationRules = {
 
  
  export const getVerificationRes = (verifications) => {
-      if (!verifications || verifications.length === 0) {
-    return <p>No verifications available.</p>;
-  }
-  
-      const basicDetailsRef = useRef(null);
-      const qualificationRef = useRef(null);
-      const aadhaarRef = useRef(null);
-      const panCardRef = useRef(null);
-      const addressRef = useRef(null);
-      const neighbourRef = useRef(null);
+
+    if (!verifications || verifications.length === 0) return null
     return(
        <div>
             <div className="">
@@ -62,7 +55,6 @@ export const validationRules = {
                     const getFieldSection = (fieldName) => {
                       if (fieldName.toLowerCase().includes("full name")) {
                         return {
-                          ref: basicDetailsRef,
                           sectionId: "basic",
                           fieldKey: "fullName",
                         };
@@ -72,27 +64,23 @@ export const validationRules = {
                         fieldName.toLowerCase().includes("dob")
                       ) {
                         return {
-                          ref: basicDetailsRef,
                           sectionId: "basic",
                           fieldKey: "dateOfBirth",
                         };
                       }
                       if (fieldName.toLowerCase().includes("pan")) {
                         return {
-                          ref: panCardRef,
                           sectionId: "panCard",
                           fieldKey: "panCardNumber",
                         };
                       }
                       if (fieldName.toLowerCase().includes("aadhaar")) {
                         return {
-                          ref: aadhaarRef,
                           sectionId: "aadhaar",
                           fieldKey: "",
                         };
                       }
                       return {
-                        ref: basicDetailsRef,
                         sectionId: "basic",
                         fieldKey: "fullName",
                       };

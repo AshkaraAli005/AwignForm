@@ -1,4 +1,4 @@
-import { Home, MapPin, Hash } from "lucide-react";
+import { Home, MapPin, Hash, ChevronsUpDown, Check } from "lucide-react";
 import FormField from "../FormField";
 import FileUpload from "../FileUpload";
 import { useAppDispatch, useAppSelector } from "../../Store/hooks";
@@ -20,14 +20,32 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../../Components/Ui/dialog";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "../../Components/Ui/command";
+import { cn } from "../../lib/utils";
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "../../Components/Ui/popover";
 import { uploadAwignaFile } from "../../services/api";
 import { useParams } from "react-router-dom";
+import { INDIAN_STATES } from "../../utils/constantDatas";
 
 const AddressStep = () => {
   const dispatch = useAppDispatch();
   const address = useAppSelector((state) => state.form.address);
   const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
     const [isCurrentAddressDialogOpen, setIsCurrentAddressDialogOpen] = useState(false);
+      const [stateOpen, setStateOpen] = useState(false);
+
 
     const {id} = useParams()
   const formData = useAppSelector((state) => state.form);
@@ -44,13 +62,13 @@ const AddressStep = () => {
     <div className="space-y-6">
       <div className="space-y-2">
         <Label className="flex items-center gap-2 text-sm font-medium">
-          <div className="w-6 h-6 rounded bg-[hsl(var(--form-icon-bg))] text-[hsl(var(--form-icon-text))] flex items-center justify-center">
-            <Home className="w-4 h-4" />
+          <div className="w-8 h-8 rounded-xl gradient-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+            <Home className="w-4 h-4 text-white" />
           </div>
           Permanent Address
           <span className="text-destructive ml-1">*</span>
         </Label>
-        <Dialog
+        {/* <Dialog
           open={isAddressDialogOpen}
           onOpenChange={setIsAddressDialogOpen}
         >
@@ -140,7 +158,112 @@ const AddressStep = () => {
             {address.houseNumber}, {address.streetName}, {address.locality},{" "}
             {address.district}, {address.state} - {address.pincode}
           </p>
-        )}
+        )} */}
+
+        {/* Address Fields Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            // icon={Home}
+            label="House Number"
+            required
+            value={address.houseNumber}
+            onChange={(value) => dispatch(updateAddress({ houseNumber: value }))}
+          />
+          <FormField
+            // icon={MapPin}
+            label="Street Name"
+            required
+            value={address.streetName}
+            onChange={(value) => dispatch(updateAddress({ streetName: value }))}
+          />
+          <FormField
+            // icon={MapPin}
+            label="Locality"
+            required
+            value={address.locality}
+            onChange={(value) => dispatch(updateAddress({ locality: value }))}
+          />
+          <FormField
+            // icon={MapPin}
+            label="Landmark"
+            required
+            value={address.landmark}
+            onChange={(value) => dispatch(updateAddress({ landmark: value }))}
+          />
+          <FormField
+            // icon={MapPin}
+            label="District"
+            required
+            value={address.district}
+            onChange={(value) => dispatch(updateAddress({ district: value }))}
+          />
+          
+          {/* State Selector with Search */}
+          <div className="space-y-2 group animate-fade-in">
+            <Label className="flex items-center gap-2.5 text-sm font-semibold text-foreground ml-2">
+              {/* <div className="w-8 h-8 rounded-xl gradient-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <MapPin className="w-4 h-4 text-white" />
+              </div> */}
+              <span>State</span>
+              <span className="text-destructive text-base">*</span>
+            </Label>
+            <Popover open={stateOpen} onOpenChange={setStateOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={stateOpen}
+                  className={cn(
+                    "h-12 w-full justify-between rounded-xl border-2 transition-all duration-300",
+                    "bg-card/50 backdrop-blur-sm",
+                    "border-border hover:border-primary/50 hover:shadow-md hover:bg-white active:border-primary/30",
+                    address.state && "focus:ring-4 focus:ring-primary/10"
+                  )}
+                >
+                  {address.state || "Select state..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Search state..." />
+                  <CommandList>
+                    <CommandEmpty>No state found.</CommandEmpty>
+                    <CommandGroup>
+                      {INDIAN_STATES.map((state) => (
+                        <CommandItem
+                          key={state}
+                          value={state}
+                          onSelect={(currentValue) => {
+                            dispatch(updateAddress({ state: currentValue }));
+                            setStateOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              address.state === state ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {state}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <FormField
+            // icon={Hash}
+            label="Pincode"
+            required
+            type="text"
+            value={address.pincode}
+            onChange={(value) => dispatch(updateAddress({ pincode: value }))}
+          />
+        </div>
       </div>
 
       <FileUpload

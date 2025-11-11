@@ -1,4 +1,4 @@
-import { CreditCard, FileImage } from "lucide-react";
+import { AlertTriangle, CreditCard, FileImage } from "lucide-react";
 import FormField from "../FormField";
 import FileUpload from "../FileUpload";
 import { useAppDispatch, useAppSelector } from "../../Store/hooks";
@@ -6,7 +6,7 @@ import { updateFiles, updateLoadingFiles, updatePanCard } from "../../Store/form
 import { getVerificationRes, sanitizeInput, validatePanCard, validationRules } from "../../utils/commonFunctions";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { uploadAwignaFile } from "../../services/api";
+import { initiateOcrExtract, uploadAwignaFile } from "../../services/api";
 
 const PanCardStep = () => {
   const dispatch = useAppDispatch();
@@ -37,9 +37,18 @@ const PanCardStep = () => {
     setErrors((prev) => ({ ...prev, panCardNumber: error }));
   };
 
+
+  const isValidImage = !formData?.validationsData?.pan_validation?.defaultData?.message.toLowerCase().includes("invalid pan format")
+
   return (
     <div className="space-y-6">
-    {fromEditClick && getVerificationRes(panVerifications)}
+      {formData?.validationsData?.pan_validation?.match === false && isValidImage && getVerificationRes([formData.validationsData.pan_validation])}
+        {formData?.validationsData?.pan_validation?.defaultData?.message.toLowerCase().includes("invalid pan format")  && <div className="border-orange-200 bg-orange-50 flex px-6 py-5 gap-3 " style={{border:"1px solid #fff7ed !important"}}>
+<AlertTriangle className="w-6 h-6 text-orange-500" />
+<div className="text-orange-800 dark:text-orange-200 font-medium">
+   Important: The uploaded file is not valid or clear . Please upload a valid image.
+</div>
+      </div>}
       <div>
         <FormField
           icon={CreditCard}
@@ -66,6 +75,7 @@ const PanCardStep = () => {
           uploadAwignaFile(id, file, "panCardFrontPhoto").then((res) =>{
             dispatch(updateFiles({panCardFrontPhoto : res.data.files.panCardFrontPhoto}))
             dispatch(updateLoadingFiles({ panCardFrontPhoto: false }))
+            initiateOcrExtract(id)
           }).catch((err) => {
             dispatch(updateFiles({panCardFrontPhoto : file}))
             dispatch(updateLoadingFiles({ panCardFrontPhoto: false }))
