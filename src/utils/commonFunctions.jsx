@@ -3,11 +3,13 @@ import {
   Image as ImageIcon,
   AlertTriangle,
   X,
+  Loader2,
+  Upload,
 } from "lucide-react";
 
 import { Badge } from "../Components/Ui/badge";
 import { Separator } from "../Components/Ui/separator";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 export const isValidEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
@@ -54,8 +56,8 @@ export const validationRules = {
                 <h3 className="text-lg font-bold">Fields Requiring Attention</h3>
               </div>
               <div className="space-y-4">
-                {verifications
-                  .filter((v) => !v.match)
+                {verifications && verifications
+                  ?.filter((v) => !v.match)
                   .map((v, i) => {
                     const getFieldSection = (fieldName) => {
                       if (fieldName.toLowerCase().includes("full name")) {
@@ -195,62 +197,140 @@ export const convertToFormData = (data, formData = new FormData(), parentKey = "
 };
 
 
-export const FilePreview = ({ label, file, handleViewClick, handleRemove }) => {
-  if (!file) return null;
-  if (Object.keys(file).length === 0) return null;
+export const FilePreview = ({ label, file, handleViewClick, onFileChange, isFileLoading,accept="image/*" }) => {
+  if (!file || Object.keys(file).length === 0) return null;
 
-  const isImage = file?.type?.startsWith("image/");
-  const fileUrl = URL?.createObjectURL(file);
+  const fileInputRef = useRef(null);
+
+  // Detect file type (supports both API and local files)
+  const isImage =
+    (file?.type && file.type.startsWith("image/")) ||
+    (file?.file_type && file.file_type.startsWith("image/"));
+
+  // Determine proper file URL
+  const fileUrl =
+    file?.signed_url ||
+    (file instanceof File ? URL.createObjectURL(file) : null);
+
+  // Safe fallbacks
+  const fileName = file?.name || file?.public_url?.split("/").pop() || "file";
+  const fileSize = file?.size ? `${(file.size / 1024).toFixed(2)} KB` : "";
+
+  // Handle file selection (when user clicks “Change File”)
+  const handleFileChange = (e) => {
+    const newFile = e.target.files?.[0];
+    if (newFile && onFileChange) {
+      onFileChange(newFile);
+    }
+    e.target.value = ""; // reset input
+  };
 
   return (
     <div className="space-y-2">
-      <span className="text-sm font-semibold text-foreground">{label}</span>
+      {label && (
+        <span className="text-sm font-semibold text-foreground">{label}</span>
+      )}
+
       <div
-  className="relative group cursor-pointer rounded-xl border-2 border-border/50 hover:border-primary/50 transition-all overflow-hidden bg-secondary/30 hover:shadow-lg"
-  onClick={() => isImage && handleViewClick(fileUrl)}
->
-  {isImage ? (
-    <div className="relative">
-      <img
-        src={fileUrl}
-        alt={label}
-        className="w-full h-48 object-contain bg-background/50 rounded-lg"
-      />
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-        <ImageIcon className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+        className="relative group cursor-pointer rounded-xl border-2 border-border/50 hover:border-primary/50 transition-all overflow-hidden bg-secondary/30 hover:shadow-lg"
+        onClick={() => isImage && handleViewClick && handleViewClick(fileUrl)}
+      >
+        {isFileLoading && !isImage && 
+                  <div className="relative">
+                  {/* 🌀 Image with loader */}
+                  <img
+                    src={fileUrl}
+                    alt={label || "Uploaded image"}
+                    className={`w-full h-48 object-contain bg-background/50 rounded-lg transition-opacity duration-300 ${
+                      isFileLoading ? "opacity-0" : "opacity-100"
+                    }`}
+                    // onLoad={() => setIsImageLoading(false)}
+                    onError={(e) => {
+                      // setIsImageLoading(false);
+                      e.target.style.display = "none";
+                    }}
+                  />     
+               <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+              </div></div>}
+        {isImage ? (
+          <div className="relative">
+            {/* 🌀 Image with loader */}
+            <img
+              src={fileUrl}
+              alt={label || "Uploaded image"}
+              className={`w-full h-48 object-contain bg-background/50 rounded-lg transition-opacity duration-300 ${
+                isFileLoading ? "opacity-0" : "opacity-100"
+              }`}
+              // onLoad={() => setIsImageLoading(false)}
+              onError={(e) => {
+                // setIsImageLoading(false);
+                e.target.style.display = "none";
+              }}
+            />
+
+            {/* Loader overlay */}
+            {isFileLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+              </div>
+            )}
+
+            {/* Hover overlay */}
+            {!isFileLoading && (
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                <ImageIcon className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="h-48 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex flex-col items-center justify-center gap-3">
+            <FileText className="w-16 h-16 text-primary" />
+            <p className="text-sm font-medium text-foreground truncate">
+              {fileName}
+            </p>
+          </div>
+        )}
+
+        {/* Footer section */}
+        <div className="p-3 rounded-b-md bg-background/80 backdrop-blur-sm border-t border-border/50 flex items-center justify-between">
+          <div>
+            <p className="text-xs text-muted-foreground truncate">{fileName}</p>
+            {fileSize && (
+              <p className="text-xs text-muted-foreground">{fileSize}</p>
+            )}
+          </div>
+
+          {/* Change File button */}
+          <div className="flex items-center gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={accept}
+              className="hidden"
+              onChange={handleFileChange}
+            />
+            <button
+              type="button"
+              disabled={isFileLoading}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                fileInputRef.current?.click();
+              }}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg border border-border hover:border-primary hover:bg-primary/5 transition-all"
+            >
+              <Upload className="w-4 h-4" />
+              Change File
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
-  ) : (
-    <div className="h-48 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex flex-col items-center justify-center gap-3">
-      <FileText className="w-16 h-16 text-primary" />
-      <p className="text-sm font-medium text-foreground">{file.name}</p>
-    </div>
-  )}
-
-  <div className="p-3 rounded-b-md bg-background/80 backdrop-blur-sm border-t border-border/50 flex items-center justify-between">
-    <div>
-      <p className="text-xs text-muted-foreground truncate">{file.name}</p>
-      <p className="text-xs text-muted-foreground">
-        {(file.size / 1024).toFixed(2)} KB
-      </p>
-    </div>
-    <button
-      type="button"
-      onClick={(e) => {
-        e.stopPropagation(); // ✅ prevents parent click from firing
-        e.preventDefault();
-        handleRemove();
-      }}
-      className="p-2.5 hover:bg-destructive/10 rounded-xl transition-all duration-200 group flex-shrink-0"
-    >
-      <X className="w-5 h-5 text-destructive group-hover:scale-110 transition-transform" />
-    </button>
-  </div>
-</div>
-
     </div>
   );
 };
+
+
 
 export const validateEmail = (email) => {
   if (!email || email.trim() === "") {

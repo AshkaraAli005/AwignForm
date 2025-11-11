@@ -10,29 +10,29 @@ export const validateStep = (step, formState) => {
           formState.basicDetails.city &&
           formState.basicDetails.motherName &&
           formState.basicDetails.fatherName &&
-          formState.basicDetails.passportPhoto &&
-          formState.basicDetails.signaturePhoto
+          formState.files.passportPhoto &&
+          formState.files.signaturePhoto
         );
   
       case 1: // Qualification
         return !!(
           formState.qualification.highestEducation &&
           formState.qualification.graduationCategory &&
-          formState.qualification.marksheetFile
+          formState.files.marksheetFile
         );
   
       case 2: // Aadhaar
         return !!(
           formState.aadhaar.aadhaarNumber &&
-          formState.aadhaar.aadhaarFrontPhoto &&
-          formState.aadhaar.aadhaarBackPhoto
+          formState.files.aadhaarFrontPhoto &&
+          formState.files.aadhaarBackPhoto
         );
   
       case 3: // PAN Card
         return !!(
           formState.panCard.panCardNumber &&
-          formState.panCard.panCardFrontPhoto &&
-          formState.panCard.passingCertificate
+          formState.files.panCardFrontPhoto &&
+          formState.files.passingCertificate
         );
   
       case 4: // Address
@@ -44,7 +44,7 @@ export const validateStep = (step, formState) => {
           formState.address.district &&
           formState.address.state &&
           formState.address.pincode &&
-          formState.address.addressProofFile &&
+          formState.files.addressProofFile &&
           formState.address.permanentSameAsCurrent
         );
   

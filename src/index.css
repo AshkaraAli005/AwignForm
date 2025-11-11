@@ -39,9 +39,10 @@ All colors MUST be HSL.
     --radius: 1rem;
     
     /* --gradient-start: 262 83% 58%; */
-    --gradient-start: 225deg 97.14% 58.82%;
+    --gradient-start: 225 97.14% 58.82%;
     /* --gradient-mid: 252 95% 65%; */
-    --gradient-mid: 225 82.86% 48.23%;
+    --gradient-mid: 225 82.68% 40.17%;
+    
     --gradient-end: 242 90% 70%;
     --success: 142 76% 36%;
     --warning: 38 92% 50%;

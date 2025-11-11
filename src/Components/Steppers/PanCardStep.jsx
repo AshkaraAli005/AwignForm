@@ -2,9 +2,11 @@ import { CreditCard, FileImage } from "lucide-react";
 import FormField from "../FormField";
 import FileUpload from "../FileUpload";
 import { useAppDispatch, useAppSelector } from "../../Store/hooks";
-import { updatePanCard } from "../../Store/formSlice";
+import { updateFiles, updateLoadingFiles, updatePanCard } from "../../Store/formSlice";
 import { getVerificationRes, sanitizeInput, validatePanCard, validationRules } from "../../utils/commonFunctions";
 import { useState } from "react";
+import { useParams } from "react-router-dom";
+import { uploadAwignaFile } from "../../services/api";
 
 const PanCardStep = () => {
   const dispatch = useAppDispatch();
@@ -14,6 +16,8 @@ const PanCardStep = () => {
     const [errors, setErrors] = useState({
     panCardNumber: "",
    });
+
+   const {id} = useParams()
 
     const panVerifications = [
     {
@@ -56,16 +60,36 @@ const PanCardStep = () => {
         label="PAN Card Front Side Photo"
         hint="Upload the original, clear document."
         required
-        value={panCard.panCardFrontPhoto}
-        onFileSelect={(file) => dispatch(updatePanCard({ panCardFrontPhoto: file }))}
+        value={formData?.files?.panCardFrontPhoto}
+        onFileSelect={(file) =>{
+          dispatch(updateLoadingFiles({ panCardFrontPhoto: true }))
+          uploadAwignaFile(id, file, "panCardFrontPhoto").then((res) =>{
+            dispatch(updateFiles({panCardFrontPhoto : res.data.files.panCardFrontPhoto}))
+            dispatch(updateLoadingFiles({ panCardFrontPhoto: false }))
+          }).catch((err) => {
+            dispatch(updateFiles({panCardFrontPhoto : file}))
+            dispatch(updateLoadingFiles({ panCardFrontPhoto: false }))
+            console.log(err)})
+        }}
+        loading={formData?.loadingFiles?.panCardFrontPhoto}
       />
 
       <FileUpload
         label="
         Upload 10th Passing Certificate or Marks Sheet Photo"
         required
-        value={panCard.passingCertificate}
-        onFileSelect={(file) => dispatch(updatePanCard({ passingCertificate: file }))}
+        value={formData?.files?.passingCertificate}
+        onFileSelect={(file) =>{
+          dispatch(updateLoadingFiles({ passingCertificate: true }))
+          uploadAwignaFile(id, file, "passingCertificate").then((res) =>{
+            dispatch(updateFiles({passingCertificate : res.data.files.passingCertificate}))
+            dispatch(updateLoadingFiles({ passingCertificate: false }))
+          }).catch((err) => {
+            dispatch(updateFiles({passingCertificate : file}))
+            dispatch(updateLoadingFiles({ passingCertificate: false }))
+            console.log(err)})
+        }}
+        loading={formData?.loadingFiles?.passingCertificate}
       />
     </div>
   );
