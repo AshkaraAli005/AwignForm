@@ -11,7 +11,7 @@ import NeighbourStep from "../Components/Steppers/NeighboursStep";
 import SummaryStep from "../Components/Steppers/SummaryStep";
 import RoleSelection from "./RoleSelection";
 import { useAppDispatch, useAppSelector } from "../Store/hooks";
-import { nextStep, prevStep,setCurrentStep, setHasSelectedRole, updateAadhaar, updateAddress, updateBasicDetails, updateNeighbour, updatePanCard, updateQualification } from "../Store/formSlice";
+import { nextStep, prevStep,setCurrentStep, setHasCompletedExServiceman, setHasSelectedRole, updateAadhaar, updateAddress, updateBasicDetails, updateFiles, updateLoadingFiles, updateNeighbour, updatePanCard, updateQualification, updateValidations, updateValidationsData } from "../Store/formSlice";
 import { toast } from "../Components/Ui/sonner";
 import { cn } from "../lib/utils";
 import { getStepValidationMessage, validateStep } from "../utils/formValidation";
@@ -19,7 +19,8 @@ import { use, useEffect, useState } from "react";
 import { convertToFormData } from "../utils/commonFunctions";
 import AwignLogo from "../assets/AwignLogo.png";
 import { useNavigate, useParams } from "react-router-dom";
-import { getAwignFormData, updateAwignFormData } from "../services/api";
+import { getAwignFormData, updateAwignFormData, validateDataApi } from "../services/api";
+import ExServicemanStep from "../Components/Steppers/ExServicemanStep";
 
 const Index = () => {
     const { id } = useParams();
@@ -27,6 +28,8 @@ const Index = () => {
   const dispatch = useAppDispatch();
   const currentStep = useAppSelector((state) => state.form.currentStep);
   const hasSelectedRole = useAppSelector((state) => state.form.hasSelectedRole);
+  const hasCompletedExServiceman = useAppSelector((state) => state.form.hasCompletedExServiceman);
+
   const formState = useAppSelector((state) => state.form);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -34,40 +37,14 @@ const Index = () => {
   // If role not selected, show role selection screen
 
 
-  //   useEffect(() => {
-  //   const loadFormData = () => {
-  //     if (id && id !== 'new') {
-  //       setIsLoading(true);
-  //       getAwignFormData(`/${id}`)
-  //       .then((res) => {
-  //         let data = res.data;
-  //         // Load data into Redux store
-  //         dispatch(setCurrentStep(data.currentStep));
-  //         dispatch(updateRole({ selectedRole: data.selectedRole }));
-  //         dispatch(setHasSelectedRole(true));
-  //         dispatch(updateBasicDetails(data.basicDetails ));
-  //         dispatch(updateQualification(data.qualification));
-  //         dispatch(updateAadhaar(data.aadhaar ));
-  //         dispatch(updatePanCard(data.panCard ));
-  //         dispatch(updateAddress(data.address ));
-  //         dispatch(updateNeighbour(data.neighbour));
-  //       }).catch((error) => {
-  //         console.error("Error loading form data:", error);
-  //         toast.error("Failed to load form data");
-  //       }).finally(() => {
-  //         setIsLoading(false);
-  //       })
-  //     }
-  //   };
-  //   loadFormData();
-  // }, [id, dispatch]);
+
 
   const steps = [
-    { number: 1, title: "Basic", isCompleted: currentStep > 0, isActive: currentStep === 0, icon: User },
-    { number: 2, title: "Education", isCompleted: currentStep > 1, isActive: currentStep === 1, icon: GraduationCap },
+    { number: 1, title: "Basic Details", isCompleted: currentStep > 0, isActive: currentStep === 0, icon: User },
+    { number: 2, title: "Education Details", isCompleted: currentStep > 1, isActive: currentStep === 1, icon: GraduationCap },
     { number: 3, title: "Aadhaar", isCompleted: currentStep > 2, isActive: currentStep === 2, icon: CreditCard },
     { number: 4, title: "PAN Card", isCompleted: currentStep > 3, isActive: currentStep === 3, icon: FileText },
-    { number: 5, title: "Address", isCompleted: currentStep > 4, isActive: currentStep === 4, icon: Home },
+    { number: 5, title: "Address Details", isCompleted: currentStep > 4, isActive: currentStep === 4, icon: Home },
     { number: 6, title: "References", isCompleted: currentStep > 5, isActive: currentStep === 5, icon: Users },
     { number: 7, title: "Summary", isCompleted: currentStep > 6, isActive: currentStep === 6, icon: ClipboardCheck },
   ];
@@ -124,25 +101,53 @@ try {
   console.error("❌ Upload failed:", error);
 }
   }
-  const handleNext = () => {
-    // if (currentStep < 6) {
-    //   dispatch(nextStep());
-    //   window.scrollTo({ top: 0, behavior: "smooth" });
-    // } else {
-    //   toast.success("🎉 Form submitted successfully!", {
-    //     description: "We'll review your application and get back to you soon.",
-    //   });
-    // }
+  const handleNext =async () => {
+    const stepMap = { 0: "basicDetails", 1: "qualification", 2: "aadhaar", 3: "panCard", 4: "address", 5: "neighbour" };
+    const { files, loadingFiles, ...cleanedFormState } = formState;
+
 
         // Validate current step before proceeding
         if (currentStep < 6) {
-            // if (!validateStep(currentStep, formState)) {
-            //   toast.error("Missing Required Fields", {
-            //     description: getStepValidationMessage(currentStep),
-            //   });
-            //   return;
-            // }
-            updateAwignFormData(`/${id}`, formState)
+            if (!validateStep(currentStep, formState)) {
+              toast.error("Missing Required Fields", {
+                description: getStepValidationMessage(currentStep),
+              });
+              return;
+            }
+    // Aadhaar step (step 2) special logic
+    // if (currentStep === 2) {
+    //   try {
+    //     await updateAwignFormData(`/${id}`, {
+    //       [stepMap[currentStep]]:
+    //         cleanedFormState[stepMap[currentStep]] || cleanedFormState,
+    //       currentStep: currentStep + 1,
+    //     });
+
+    //     const res = await validateDataApi(id);
+    //     if (!res?.aadhaar_validation?.is_valid) {
+    //       toast.error("Aadhaar verification failed. Please try again.");
+    //       let validationsData = res?.aadhaar_validation
+    //       dispatch(updateValidationsData({aadhaarValidations: {
+    //         field: "Aadhaar Number",
+    //         value: validationsData?.user_provided,
+    //         documentValue: validationsData?.extracted,
+    //         match: validationsData?.user_provided.toUpperCase() === validationsData?.extracted,
+    //         matchPercentage: 100,
+    //         document: "Aadhaar Card Front Image",
+    //       }}));
+    //       window.scrollTo({ top: 0, behavior: 'smooth' });
+    //       return; // ✅ Stops inside this block
+    //     }else{
+    //       dispatch(updateValidationsData({aadhaarValidations: {match: true}}));a
+    //     }
+    //   } catch (error) {
+    //     toast.error("Aadhaar validation failed due to network error.");
+    //     return;
+    //   }}
+
+            
+
+            updateAwignFormData(`/${id}`, { [stepMap[currentStep]]: cleanedFormState[stepMap[currentStep]] || cleanedFormState });
             dispatch(nextStep());
             window.scrollTo({ top: 0, behavior: 'smooth' });
           } else {
@@ -176,17 +181,35 @@ try {
 
 useEffect(() => {
   if(id){
+    dispatch(updateLoadingFiles({
+      aadhaarFrontPhoto: true,
+      aadhaarBackPhoto: true,
+      panCardPhoto: true,
+      addressProofPhoto: true,
+      neighbourPhoto: true,
+    }))
     getAwignFormData(`/${id}`)
     .then((res) => {
           let data = res.data;
           // dispatch(updateRole({ selectedRole: data?.selectedRole }));
+
           dispatch(setHasSelectedRole(true));
+          dispatch(setHasCompletedExServiceman(true));
           dispatch(updateBasicDetails(data?.basicDetails ));
           dispatch(updateQualification(data?.qualification));
           dispatch(updateAadhaar(data?.aadhaar ));
           dispatch(updatePanCard(data?.panCard ));
           dispatch(updateAddress(data?.address ));
           dispatch(updateNeighbour(data?.neighbour));
+          dispatch(updateFiles(data?.files));
+          // dispatch(setCurrentStep(res?.current_page));
+          dispatch(updateLoadingFiles({
+            aadhaarFrontPhoto: false,
+            aadhaarBackPhoto: false,
+            panCardPhoto: false,
+            addressProofPhoto: false,
+            neighbourPhoto: false,
+          }))
     }).catch((error) => {
       console.error("Error loading form data:", error);
       toast.error("Failed to load form data");
@@ -198,14 +221,19 @@ useEffect(() => {
   // window.scrollTo({ top: 0, behavior: "smooth" });
 },[currentStep])
 
-console.log(formState)
 useEffect(() => {
   if(id){
     dispatch(setHasSelectedRole(true));
   }
 }, []);
 
+
   const handleBack = () => {
+    if(currentStep === 0){
+      dispatch(setHasCompletedExServiceman(false));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return
+    }
     dispatch(prevStep());
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -217,6 +245,74 @@ useEffect(() => {
   };
     if (!hasSelectedRole) {
     return <RoleSelection />;
+  }
+  if (!hasCompletedExServiceman) {
+    return (
+      <div className="min-h-screen relative overflow-hidden">
+        {/* Animated Background */}
+        <div className="fixed inset-0 -z-10">
+          <div className="absolute inset-0 bg-gradient-to-br from-background via-secondary/30 to-accent/20" />
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" />
+          <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" style={{ animationDelay: '2s' }} />
+        </div>
+
+        {/* Header */}
+        <header className="relative border-b border-border/50 backdrop-blur-xl bg-card/50">
+          <div className="container mx-auto px-6 py-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center shadow-glow">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold gradient-text">Application Portal</h1>
+                <p className="text-sm text-muted-foreground">Pre-step: Service Status</p>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="container mx-auto px-4 py-8 max-w-3xl">
+          <Card className="shadow-modern border-2 border-border/50 rounded-3xl overflow-hidden backdrop-blur-xl bg-card/80 animate-scale-in">
+            <div className="relative gradient-primary p-8 overflow-hidden">
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48cGF0aCBkPSJNLTEwIDMwaDYwdjJoLTYweiIgZmlsbD0iI2ZmZiIgZmlsbC1vcGFjaXR5PSIuMDUiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjYSkiLz48L3N2Zz4=')] opacity-10" />
+              <div className="relative">
+                <h2 className="text-3xl font-bold text-white mb-2">Ex-Serviceman Status</h2>
+                <p className="text-white/80 text-sm">Please provide your ex-serviceman status</p>
+              </div>
+            </div>
+
+            <div className="p-8">
+              <ExServicemanStep />
+            </div>
+          </Card>
+
+          <div className="flex justify-between items-center mt-8">
+          <Button
+            variant="outline"
+            onClick={() => {dispatch(setHasSelectedRole(false)); window.scrollTo({ top: 0, behavior: "smooth" });}}
+            // disabled={currentStep === 0}
+            className={cn(
+              "h-12 px-6 rounded-xl border-2 font-semibold transition-all duration-300",
+              "hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            )}
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+            <Button
+              onClick={() => dispatch(setHasCompletedExServiceman(true))}
+              className={cn(
+                "h-12 px-8 rounded-xl gradient-primary text-white font-bold shadow-glow",
+                "hover:scale-105 transition-all duration-300 hover:shadow-xl border-0"
+              )}
+            >
+              Continue
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -255,13 +351,13 @@ useEffect(() => {
         </div>
       </header> */}
         
-        <header className="relative border-b border-border/50 backdrop-blur-xl bg-card/50 sticky top-0 z-30">
-        <div className="container mx-2 px-6 py-3">
+        <header id="main-header" className="relative border-b border-border/50 backdrop-blur-xl bg-card/50  top-0 z-30">
+         <div className="container mx-2 px-6 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
              <img src={AwignLogo} height={"50px"} width={50} alt="Awign Logo" />
               <div>
-                <h1 className="text-lg md:text-2xl font-bold gradient-text">Awign Onboarding Interface</h1>
+                <h1 className="text-lg md:text-xl font-bold gradient-text">Awign Onboarding Interface</h1>
                 <p className="text-sm text-muted-foreground">Complete your registration</p>
               </div>
             </div>
@@ -315,7 +411,7 @@ useEffect(() => {
           <Button
             variant="outline"
             onClick={handleBack}
-            disabled={currentStep === 0}
+            // disabled={currentStep === 0}
             className={cn(
               "h-12 px-6 rounded-xl border-2 font-semibold transition-all duration-300",
               "hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"

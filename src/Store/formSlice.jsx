@@ -4,6 +4,7 @@ const initialState = {
   currentStep: 0,
   hasSelectedRole: false,
   hasCompletedPreSteps: false,
+  hasCompletedExServiceman: false,
   fromEditClick: false,
 
   onboardingChannel: {
@@ -18,6 +19,20 @@ const initialState = {
     selectedRole: "",
   },
 
+  files: {
+    dischargeBook: null,
+    exServicemanId: null,
+    passportPhoto: null,
+    signaturePhoto: null,
+    marksheetFile: null,
+    addressProofFile: null,
+    aadhaarFrontPhoto: null,
+    aadhaarBackPhoto: null,
+    panCardFrontPhoto: null,
+    passingCertificate: null,
+
+  },
+
   basicDetails: {
     fullName: "",
     mobileNumber: "",
@@ -27,26 +42,21 @@ const initialState = {
     city: "",
     motherName: "",
     fatherName: "",
-    passportPhoto: null,
-    signaturePhoto: null,
+
   },
 
   qualification: {
     highestEducation: "",
     graduationCategory: "",
-    marksheetFile: null,
   },
 
   aadhaar: {
     aadhaarNumber: "",
-    aadhaarFrontPhoto: null,
-    aadhaarBackPhoto: null,
+
   },
 
   panCard: {
     panCardNumber: "",
-    panCardFrontPhoto: null,
-    passingCertificate: null,
   },
 
   address: {
@@ -57,8 +67,11 @@ const initialState = {
     district: "",
     state: "",
     pincode: "",
-    addressProofFile: null,
     permanentSameAsCurrent: "",
+  },
+  exServiceman: {
+    isExServiceman: '',
+
   },
 
   neighbour: {
@@ -67,6 +80,27 @@ const initialState = {
     nearestPoliceStation: "",
     howDidYouKnow: "",
   },
+  loadingFiles: {
+    aadhaarFrontPhoto: false,
+    aadhaarBackPhoto: false,
+    panCardFrontPhoto: false,
+    passingCertificate: false,
+    marksheetFile: false,
+    addressProofFile: false
+  },
+  formErrors: {
+    basicDetails:false,
+    qualification:false,
+    aadhaar:false,
+    panCard:false,
+    address:false
+  },
+  validations: {
+    aadhaarNumValidation: false
+  },
+  validationsData: {
+    aadhaarValidations: {}
+  }
 };
 
 const formSlice = createSlice({
@@ -96,10 +130,20 @@ const formSlice = createSlice({
     setHasCompletedPreSteps: (state, action) => {
       state.hasCompletedPreSteps = action.payload;
     },
+    setHasCompletedExServiceman: (state, action) => {
+      state.hasCompletedExServiceman = action.payload;
+    },
 
     updateOnboardingChannel: (state, action) => {
       state.onboardingChannel = {
         ...state.onboardingChannel,
+        ...action.payload,
+      };
+    },
+
+    updateLoadingFiles: (state, action) => {
+      state.loadingFiles = {
+        ...state.loadingFiles,
         ...action.payload,
       };
     },
@@ -139,6 +183,21 @@ const formSlice = createSlice({
     updateFromEditClick: (state, action) => {
       state.fromEditClick = action.payload;
     },
+    updateFiles: (state, action) => {
+      state.files = { ...state.files, ...action.payload };
+    },
+    updateFormErrors: (state, action) => {
+      state.formErrors = { ...state.formErrors, ...action.payload };
+    },
+    updateExServiceman: (state, action) => {
+      state.exServiceman = { ...state.exServiceman, ...action.payload };
+    },
+    updateValidations: (state, action) => {
+      state.validations = { ...state.validations, ...action.payload };
+    },
+    updateValidationsData: (state, action) => {
+      state.validationsData = { ...state.validationsData, ...action.payload };
+    },
 
     resetForm: () => initialState,
   },
@@ -161,6 +220,14 @@ export const {
   updateNeighbour,
   resetForm,
   updateFromEditClick,
+  updateFiles,
+  updateLoadingFiles,
+  updateFormErrors,
+  updateValidations,
+  updateValidationsData,
+  updateExServiceman,
+  setHasCompletedExServiceman
+
 } = formSlice.actions;
 
 export default formSlice.reducer;

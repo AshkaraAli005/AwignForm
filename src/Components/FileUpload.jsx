@@ -13,6 +13,7 @@ const FileUpload = ({
   multiple = false,
   validationType = "image",
   value ,
+  loading
 }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
@@ -100,29 +101,44 @@ const FileUpload = ({
       ? "Images only (PNG, JPG, WEBP) - Max 5MB"
       : "Images or PDF - Max 5MB per file";
 
-   useEffect(() => {
-    if (value) {
-      const files = Array.isArray(value) ? value : [value];
-      setSelectedFiles(files);
+      useEffect(() => {
+        if (value) {
+          // Convert single file to array for consistent handling
+          const files = Array.isArray(value) ? value : [value];
+          setSelectedFiles(files);
       
-      // Generate previews for existing files
-      const newPreviews = [];
-      files.forEach((file) => {
-        if (file?.type?.startsWith('image/')) {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            newPreviews.push(reader.result);
-            if (newPreviews.length === files.length) {
-              setPreviews(newPreviews);
+          // Generate previews for existing files or uploaded files
+          const newPreviews = [];
+      
+          files.forEach((file) => {
+            // If the file came from API (with signed_url)
+            if (file?.signed_url) {
+              newPreviews.push(file.signed_url);
             }
-          };
-          reader.readAsDataURL(file);
+            // If it's an actual File object (uploaded by user)
+            else if (file instanceof File && file?.type?.startsWith("image/")) {
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                newPreviews.push(reader.result);
+                if (newPreviews.length === files.length) {
+                  setPreviews([...newPreviews]);
+                }
+              };
+              reader.readAsDataURL(file);
+            } else {
+              newPreviews.push("");
+            }
+      
+            // Once all previews are gathered
+            if (newPreviews.length === files.length) {
+              setPreviews([...newPreviews]);
+            }
+          });
         } else {
-          newPreviews.push('');
+          setSelectedFiles([]);
+          setPreviews([]);
         }
-      });
-    }
-  }, [value]);
+      }, [value]);
   return (
     <div className="space-y-3 animate-fade-in">
     <div>
@@ -182,6 +198,8 @@ const FileUpload = ({
           </label>
         ) : (
           <div className="space-y-3">
+            {loading && (
+              <FilePreview isFileLoading={loading}/>  )}
             {selectedFiles.map((file, index) => (
               multiple ? <div
                 key={index}
@@ -226,7 +244,7 @@ const FileUpload = ({
                 >
                   <X className="w-5 h-5 text-destructive group-hover:scale-110 transition-transform" />
                 </button>
-              </div>: <FilePreview file={file} label={file.label} handleRemove={() => handleRemove(0)} />
+              </div>: <FilePreview file={file} label={file.label} accept={accept} onFileChange={(file) => onFileSelect(file)} isFileLoading={loading}/>
             ))}
 
             {multiple && (

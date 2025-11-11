@@ -2,7 +2,7 @@ import { Home, MapPin, Hash } from "lucide-react";
 import FormField from "../FormField";
 import FileUpload from "../FileUpload";
 import { useAppDispatch, useAppSelector } from "../../Store/hooks";
-import { updateAddress } from "../../Store/formSlice";
+import { updateAddress, updateFiles, updateLoadingFiles } from "../../Store/formSlice";
 import {
   Select,
   SelectContent,
@@ -20,12 +20,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../../Components/Ui/dialog";
+import { uploadAwignaFile } from "../../services/api";
+import { useParams } from "react-router-dom";
 
 const AddressStep = () => {
   const dispatch = useAppDispatch();
   const address = useAppSelector((state) => state.form.address);
   const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
     const [isCurrentAddressDialogOpen, setIsCurrentAddressDialogOpen] = useState(false);
+
+    const {id} = useParams()
+  const formData = useAppSelector((state) => state.form);
 
 
   const handleSaveAddress = () => {
@@ -141,13 +146,23 @@ const AddressStep = () => {
       <FileUpload
         label="Upload Permanent Address Proof (Minimum Last 10 Years Address proof)"
         required
-        value={address.addressProofFile}
-        multiple={true}
+        value={formData.files.addressProofFile}
+        // multiple={true}
         validationType="document"
         accept="image/*,.pdf"
-        onFileSelect={(file) =>
-          dispatch(updateAddress({ addressProofFile: file }))
-        }
+        // onFileSelect={(file) =>
+        //   dispatch(updateAddress({ addressProofFile: file }))
+        // }
+        onFileSelect={(file) =>{
+          dispatch(updateLoadingFiles({ addressProofFile: true }))
+          uploadAwignaFile(id, file, "addressProofFile").then((res) =>{
+            dispatch(updateFiles({addressProofFile : res.data.files.addressProofFile}))
+            dispatch(updateLoadingFiles({ addressProofFile: false }))
+          }).catch((err) => {
+            dispatch(updateFiles({addressProofFile : file}))
+            dispatch(updateLoadingFiles({ addressProofFile: false }))
+            console.log(err)})
+        }}
       />
 
       <div className="space-y-2">

@@ -9,12 +9,13 @@ import { toast } from "sonner";
 import { cn } from "../lib/utils";
 import { useState } from "react";
 import AwignLogo from "../assets/AwignLogo.png";
-import api, { createAwignForm } from "../services/api";
-import { useNavigate } from "react-router-dom";
+import api, { createAwignForm, updateAwignFormData } from "../services/api";
+import { useNavigate, useParams } from "react-router-dom";
 
 const PreSteps = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+   const {id} = useParams();
   const onboardingChannel = useAppSelector((state) => state.form.onboardingChannel);
   const disclaimer = useAppSelector((state) => state.form.disclaimer);
   const [currentPreStep, setCurrentPreStep] = useState(0);
@@ -36,12 +37,21 @@ const PreSteps = () => {
         });
         return;
       }
-      createAwignForm({onboardingChannel:{ channel: onboardingChannel.channel} }).then((res) => {
-        console.log(res);
-        navigate(`/form/${res?.reference_id}`);
-      }).catch((err) => {
-        console.log(err);
-      });
+      if(id){
+        updateAwignFormData(id, {onboardingChannel:{ channel: onboardingChannel.channel} }).then((res) => {
+          console.log(res);
+          navigate(`/form/${res?.reference_id}`);
+        }).catch((err) => {
+          console.log(err);
+        });
+      }else{
+        createAwignForm({onboardingChannel:{ channel: onboardingChannel.channel} }).then((res) => {
+          console.log(res);
+          navigate(`/form/${res?.reference_id}`);
+        }).catch((err) => {
+          console.log(err);
+        });
+      }
       dispatch(setHasCompletedPreSteps(true));
     }
   };

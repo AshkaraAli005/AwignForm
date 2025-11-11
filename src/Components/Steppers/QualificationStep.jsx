@@ -1,14 +1,18 @@
 import { GraduationCap, FileCheck } from "lucide-react";
 import FileUpload from "../FileUpload";
 import { useAppDispatch, useAppSelector } from "../../Store/hooks";
-import { updateQualification } from "../../Store/formSlice";
+import { updateFiles, updateLoadingFiles, updateQualification } from "../../Store/formSlice";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../Components/Ui/select";
 import { Label } from "../../Components/Ui/label";
+import { useParams } from "react-router-dom";
+import { uploadAwignaFile } from "../../services/api";
 
 const QualificationStep = () => {
   const dispatch = useAppDispatch();
   const qualification = useAppSelector((state) => state.form.qualification);
-
+  const {id} = useParams()
+  // const aadhaar = useAppSelector((state) => state.form.aadhaar);
+  const formData = useAppSelector((state) => state.form);
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -75,8 +79,16 @@ const QualificationStep = () => {
         hint="Consolidated Marksheet or All year's semester marksheet (Hint - Combine all of the semester's / year's marksheets into a single PDF file, then upload it.)"
         required
         accept=".pdf,image/*"
-        value={qualification.marksheetFile}
-        onFileSelect={(file) => dispatch(updateQualification({ marksheetFile: file }))}
+        value={formData.files.marksheetFile}
+        // onFileSelect={(file) => dispatch(updateQualification({ marksheetFile: file }))}
+        onFileSelect={(file) =>{
+          dispatch(updateLoadingFiles({marksheetFile: true}))
+          uploadAwignaFile(id, file, "marksheetFile").then((response) => {
+            dispatch(updateFiles({marksheetFile: response.data.files.marksheetFile}));
+            dispatch(updateLoadingFiles({marksheetFile: false}))
+            // initiateOcrExtract(id)
+          })
+        }}
       />
     </div>
   );

@@ -1,11 +1,12 @@
-import { Briefcase, UserCheck, Building2, Sparkles } from "lucide-react";
+import { Briefcase, UserCheck, Building2, Sparkles, ArrowLeft } from "lucide-react";
 import { Card } from "../Components/Ui/card";
 import { cn } from "../lib/utils";
 import { useAppDispatch, useAppSelector } from "../Store/hooks";
-import { updateRole, setHasSelectedRole } from "../Store/formSlice";
+import { updateRole, setHasSelectedRole, setHasCompletedPreSteps } from "../Store/formSlice";
 import { useEffect, useState } from "react";
 import PreSteps from "./PreSteps";
 import AwignLogo from "../assets/AwignLogo.png";
+import { Button } from "../Components/Ui/button";
 
 const roles = [
   {
@@ -89,12 +90,12 @@ const RoleSelection = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-16 max-w-6xl">
+      <div className="container mx-auto px-4 py-16 pt-8 max-w-6xl">
         <div className="text-center mb-12 animate-fade-in">
           <h2 className="text-4xl md:text-5xl font-bold gradient-text mb-4">
             Choose Your Role
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-md text-muted-foreground max-w-2xl mx-auto">
             Select the role that best describes your application purpose. This helps us customize your experience.
           </p>
         </div>
@@ -166,6 +167,23 @@ const RoleSelection = () => {
               </Card>
             );
           })}
+        </div>
+        <div className="flex justify-between items-center mt-8 gap-4 flex-wrap">
+          <Button
+            variant="outline"
+            onClick={() => {
+              dispatch(setHasCompletedPreSteps(false));
+            }}
+            // disabled={currentStep === 0}
+            className={cn(
+              "h-12 px-6 rounded-xl border-2 font-semibold transition-all duration-300",
+              "hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            )}
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+
         </div>
 
         {selectedRole && (

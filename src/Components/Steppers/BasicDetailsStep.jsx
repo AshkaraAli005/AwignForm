@@ -2,7 +2,7 @@ import { User, Phone, Mail, Calendar, MapPin, CalendarIcon } from "lucide-react"
 import FormField from "../FormField";
 import FileUpload from "../FileUpload";
 import { useAppDispatch, useAppSelector } from "../../Store/hooks";
-import { updateBasicDetails } from "../../Store/formSlice";
+import { updateBasicDetails, updateFiles, updateFormErrors, updateLoadingFiles } from "../../Store/formSlice";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../Components/Ui/select";
 import { Label } from "../../Components/Ui/label";
 import { Button } from "../../Components/Ui/button";
@@ -17,11 +17,17 @@ import { cn } from "../../lib/utils";
 import { useEffect, useState } from "react";
 import { validatePhone } from "../../utils/formValidation";
 import { sanitizeInput, validateEmail, validationRules } from "../../utils/commonFunctions";
+import { uploadAwignaFile } from "../../services/api";
+import { useParams } from "react-router-dom";
 
 const BasicDetailsStep = () => {
   const dispatch = useAppDispatch();
   const basicDetails = useAppSelector((state) => state.form.basicDetails);
+  const formData = useAppSelector((state) => state.form);
+
   const [open, setOpen] = useState(false);
+  const {id} = useParams()
+
 
 
     const handlePhoneChange = (value) => {
@@ -41,6 +47,10 @@ const BasicDetailsStep = () => {
     passportPhoto: "",
     signaturePhoto: "",
   });
+
+  useEffect(() => {
+    const hasError = Object.values(errors).some(error => error !== "");
+    dispatch(updateFormErrors({ basicDetails: hasError }));  },[errors, dispatch])
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -274,15 +284,29 @@ const BasicDetailsStep = () => {
       <FileUpload
         label="Passport size photo"
         required
-        value={basicDetails.passportPhoto}
-        onFileSelect={(file) => dispatch(updateBasicDetails({ passportPhoto: file }))}
+        value={ formData?.files?.passportPhoto }
+        onFileSelect={(file) =>{
+          dispatch(updateLoadingFiles({ passportPhoto: true }))
+          uploadAwignaFile(id, file, "passportPhoto").then((res) =>{
+            dispatch(updateFiles(res.data.files))
+            dispatch(updateLoadingFiles({ passportPhoto: false }))
+          }).catch((err) => console.log(err))
+        }}
+        loading={formData?.loadingFiles?.passportPhoto}
       />
 
       <FileUpload
         label="Your signature's photo"
         required
-        value={basicDetails.signaturePhoto}
-        onFileSelect={(file) => dispatch(updateBasicDetails({ signaturePhoto: file }))}
+        value={formData.files.signaturePhoto}
+        onFileSelect={(file) =>{
+          dispatch(updateLoadingFiles({ signaturePhoto: true }))
+          uploadAwignaFile(id, file, "signaturePhoto").then((res) =>{
+            dispatch(updateFiles(res.data.files))
+            dispatch(updateLoadingFiles({ signaturePhoto: false }))
+          }).catch((err) => console.log(err))
+        }}
+        loading={formData.loadingFiles.signaturePhoto}
       />
     </div>
   );

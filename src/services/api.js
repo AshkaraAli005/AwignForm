@@ -32,14 +32,22 @@ export const getAwignFormData = (endpoint, config = {}) => {
 };
 
 export const updateAwignFormData = (endpoint, data, config = {}) => {
-  return apiRequest("patch", endpoint, data, config);
+  return apiRequest("put", endpoint, data, config);
+};
+
+export const initiateOcrExtract = (id) => {
+  return apiRequest("post", `/ocr-extraction/${id}`);
+};
+
+export const validateDataApi = (id) => {
+  return apiRequest("post", `/validate-documents/${id}`);
 };
 
 export const uploadAwignaFile = (endpoint, file, name = "file" , config = {}) => {
   const formData = new FormData();
   formData.append(name, file);
 
-  return apiRequest("patch", `/${endpoint}`, formData, { 
+  return apiRequest("post", `/upload_files/${endpoint}`, formData, { 
     headers: { "Content-Type": "multipart/form-data" },
     ...config,
   });

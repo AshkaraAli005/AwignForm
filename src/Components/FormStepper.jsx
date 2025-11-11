@@ -1,7 +1,23 @@
 import { CheckCircle2, Circle } from "lucide-react";
 import { cn } from "../lib/utils";
+import { useEffect, useState } from "react";
 
 const FormStepper = ({ steps, onStepClick }) => {
+  const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+
+  useEffect(() => {
+    const header = document.getElementById("main-header");
+    if (!header) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsHeaderHidden(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+
+    observer.observe(header);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <>
       {/* Mobile View - Horizontal Compact */}
@@ -87,8 +103,11 @@ const FormStepper = ({ steps, onStepClick }) => {
 
 
       {/* Desktop View - Vertical Sidebar (Sticky) */}
-      <div className="hidden lg:block w-64 pr-6">
-        <div className="sticky top-4 space-y-2">
+      <div className="hidden lg:block w-64 pr-5 ml-2">
+        <div
+          className={`${isHeaderHidden ? "fixed top-10" : "sticky top-[50px]"
+            } transition-all duration-500 w-64`}
+        >   
           {/* Header */}
           {/* <div className="mb-8">
             {/* <h3 className="text-lg font-bold gradient-text">Application Steps</h3> *
@@ -104,9 +123,9 @@ const FormStepper = ({ steps, onStepClick }) => {
               <div key={step.number} className="relative">
                 {/* Connecting Line */}
                 {!isLast && (
-                  <div className="absolute left-[2.2rem] top-14 w-0.5 h-16 bg-border">
+                  <div className="absolute left-[2.2rem] top-12 w-0.5 h-16 bg-border">
                     {step.isCompleted && (
-                      <div className="w-full h-full gradient-primary transition-all duration-500" />
+                      <div className="w-full h-full bg-gradient-to-br from-green-400 to-green-600 transition-all duration-500" />
                     )}
                   </div>
                 )}
@@ -114,8 +133,8 @@ const FormStepper = ({ steps, onStepClick }) => {
                 {/* Step Item */}
                 <div
                   className={cn(
-                    "relative flex items-start gap-4 p-3 rounded-xl transition-all duration-300",
-                    step.isActive && "bg-accent/10 scale-105",
+                    "relative flex items-start gap-4 px-3 py-2 rounded-xl transition-all duration-300",
+                    step.isActive && "scale-105",
                     (step.isCompleted || step.isActive) && onStepClick && "cursor-pointer hover:bg-accent/5",
                     !step.isActive && !step.isCompleted && "hover:bg-muted/30"
                   )}

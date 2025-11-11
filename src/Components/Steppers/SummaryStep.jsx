@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   Eye,
   FileCheck,
+  Edit,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../../Store/hooks";
 import { Card,CardContent, CardHeader, CardTitle  } from "../../Components/Ui/card";
@@ -39,6 +40,7 @@ import {
   updateNeighbour,
 } from "../../Store/formSlice";
 import { Alert, AlertDescription, AlertTitle } from "../../Components/Ui/alert";
+import { FilePreview } from "../../utils/commonFunctions";
 
 
 
@@ -165,83 +167,83 @@ console.log("formdata",formData);
     </div>
   );
 
-  const FilePreview = ({ label, file }) => {
-    if (!file) return null;
-    let isMultipleFiles = false;
-    if(Array.isArray(file)){
-      isMultipleFiles = true;
-    }
-    const isImage = !isMultipleFiles && file.type.startsWith("image/");
-    const fileUrl = !isMultipleFiles && URL.createObjectURL(file);
+  // const FilePreview = ({ label, file }) => {
+  //   if (!file) return null;
+  //   let isMultipleFiles = false;
+  //   if(Array.isArray(file)){
+  //     isMultipleFiles = true;
+  //   }
+  //   const isImage = !isMultipleFiles && file.type.startsWith("image/");
+  //   const fileUrl = !isMultipleFiles && URL.createObjectURL(file);
 
-    return (
-      !isMultipleFiles ?<div className="space-y-2">
-        <span className="text-sm font-semibold text-foreground">{label}</span>
-        <div
-          className="relative group cursor-pointer rounded-xl border-2 border-border/50 hover:border-primary/50 transition-all overflow-hidden bg-secondary/30 hover:shadow-lg"
-          onClick={() => isImage && setPreviewImage(fileUrl)}
-        >
-          {isImage ? (
-            <div className="relative">
-              <img
-                src={fileUrl}
-                alt={label}
-                className="w-full h-48 object-contain bg-background/50 rounded-lg"
-              />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                <ImageIcon className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-            </div>
-          ) : (
-            <div className="h-48 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex flex-col items-center justify-center gap-3">
-              <FileText className="w-16 h-16 text-primary" />
-              <p className="text-sm font-medium text-foreground">{file.name}</p>
-            </div>
-          )}
-          <div className="p-3 rounded-b-md bg-background/80 backdrop-blur-sm border-t border-border/50">
-            <p className="text-xs text-muted-foreground truncate">{file.name}</p>
-            <p className="text-xs text-muted-foreground">
-              {(file.size / 1024).toFixed(2)} KB
-            </p>
-          </div>
-        </div>
-      </div> :  
-       <div className="space-y-2">
-          {file.map((f, index) => (
+  //   return (
+  //     !isMultipleFiles ?<div className="space-y-2">
+  //       <span className="text-sm font-semibold text-foreground">{label}</span>
+  //       <div
+  //         className="relative group cursor-pointer rounded-xl border-2 border-border/50 hover:border-primary/50 transition-all overflow-hidden bg-secondary/30 hover:shadow-lg"
+  //         onClick={() => isImage && setPreviewImage(fileUrl)}
+  //       >
+  //         {isImage ? (
+  //           <div className="relative">
+  //             <img
+  //               src={fileUrl}
+  //               alt={label}
+  //               className="w-full h-48 object-contain bg-background/50 rounded-lg"
+  //             />
+  //             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+  //               <ImageIcon className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+  //             </div>
+  //           </div>
+  //         ) : (
+  //           <div className="h-48 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex flex-col items-center justify-center gap-3">
+  //             <FileText className="w-16 h-16 text-primary" />
+  //             <p className="text-sm font-medium text-foreground">{file.name}</p>
+  //           </div>
+  //         )}
+  //         <div className="p-3 rounded-b-md bg-background/80 backdrop-blur-sm border-t border-border/50">
+  //           <p className="text-xs text-muted-foreground truncate">{file.name}</p>
+  //           <p className="text-xs text-muted-foreground">
+  //             {(file.size / 1024).toFixed(2)} KB
+  //           </p>
+  //         </div>
+  //       </div>
+  //     </div> :  
+  //      <div className="space-y-2">
+  //         {file.map((f, index) => (
             
-            <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 border border-border/50">
-              <div className="flex items-center gap-2">
-                {f.type.startsWith("image/") ?
-                 <div className="relative group">
-                      <img
-                        src={URL.createObjectURL(f)}
-                        alt="Preview"
-                        className="w-20 h-20 object-cover rounded-xl shadow-md ring-2 ring-primary/20"
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-xl transition-colors" />
-                    </div>: 
-                    <div className="w-20 h-20 rounded-xl gradient-primary flex items-center justify-center shadow-md">
-                      <FileCheck className="w-8 h-8 text-white" />
-                </div>}
-                <div>
-                  <p className="text-sm font-medium">{label} {file.length > 1 ? `(${index + 1}/${file.length})` : ''}</p>
-                  <p className="text-xs text-muted-foreground">{f.name}</p>
-                </div>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() =>  setPreviewImage(URL.createObjectURL(f))}
-                className="h-8 gap-1"
-              >
-                <Eye className="w-3 h-3" />
-                Preview
-              </Button>
-            </div>
-          ))}
-        </div>
-    );
-  };
+  //           <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 border border-border/50">
+  //             <div className="flex items-center gap-2">
+  //               {f.type.startsWith("image/") ?
+  //                <div className="relative group">
+  //                     <img
+  //                       src={URL.createObjectURL(f)}
+  //                       alt="Preview"
+  //                       className="w-20 h-20 object-cover rounded-xl shadow-md ring-2 ring-primary/20"
+  //                     />
+  //                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-xl transition-colors" />
+  //                   </div>: 
+  //                   <div className="w-20 h-20 rounded-xl gradient-primary flex items-center justify-center shadow-md">
+  //                     <FileCheck className="w-8 h-8 text-white" />
+  //               </div>}
+  //               <div>
+  //                 <p className="text-sm font-medium">{label} {file.length > 1 ? `(${index + 1}/${file.length})` : ''}</p>
+  //                 <p className="text-xs text-muted-foreground">{f.name}</p>
+  //               </div>
+  //             </div>
+  //             <Button
+  //               size="sm"
+  //               variant="outline"
+  //               onClick={() =>  setPreviewImage(URL.createObjectURL(f))}
+  //               className="h-8 gap-1"
+  //             >
+  //               <Eye className="w-3 h-3" />
+  //               Preview
+  //             </Button>
+  //           </div>
+  //         ))}
+  //       </div>
+  //   );
+  // };
 
   const getVerificationRes = (verifications) => {
       if (!verifications || verifications.length === 0) {
@@ -403,18 +405,27 @@ console.log("formdata",formData);
           }
         };
 
+        console.log(v.document)
+
         return (
           <div
             key={i}
             className="p-4 rounded-xl bg-card border border-border cursor-pointer hover:border-primary/50 transition-all"
             // onClick={scrollToField}
           >
+            <div>
             <div className="flex items-start justify-between mb-2">
+              <div className="flex justify-between w-full ">
               <div>
                 <p className="font-semibold">{v.field}</p>
                 <p className="text-sm text-muted-foreground">From {v.document}</p>
-                <p className="text-xs text-primary mt-1">Click to edit</p>
+                {/* <p className="text-xs text-primary mt-1">Click to edit</p> */}
               </div>
+              <button className="rounded-md px-4 gap-2 py-1" style={{border:"1px solid #d1d5db", display:'flex', alignItems:"center",}}>
+                <Edit className="w-4 h-4"/> Edit
+              </button>
+              </div>
+
               {/* <Badge variant="outline" className="border-orange-500 text-orange-500">
                 {v.matchPercentage}% match
               </Badge> */}
@@ -432,6 +443,10 @@ console.log("formdata",formData);
                 <p className="font-semibold">{v.documentValue}</p>
               </div>
             </div>
+          </div>
+          <div className="mt-2">
+          <FilePreview file={v.document.toLowerCase().includes("pan")?form.files.panCardFrontPhoto:form.files.aadhaarFrontPhoto} />
+          </div>
           </div>
         );
       })}
@@ -453,8 +468,8 @@ console.log("formdata",formData);
         <Field label="Mother's Name" value={form.basicDetails.motherName} />
         <Field label="Father's Name" value={form.basicDetails.fatherName} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-          <FilePreview label="Passport size photo" file={form.basicDetails.passportPhoto} />
-          <FilePreview label="Your signature's photo" file={form.basicDetails.signaturePhoto} />
+          <FilePreview label="Passport size photo" file={form.files.passportPhoto} />
+          <FilePreview label="Your signature's photo" file={form.files.signaturePhoto} />
         </div>
       </Section>
 
@@ -470,8 +485,8 @@ console.log("formdata",formData);
       <Section title="Aadhaar Details" icon={CreditCard} stepNumber={2}>
         <Field label="Aadhaar Card Number" value={form.aadhaar.aadhaarNumber} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-          <FilePreview label="Aadhaar Card Front Side Photo" file={form.aadhaar.aadhaarFrontPhoto} />
-          <FilePreview label="Aadhaar Card Back Side Photo" file={form.aadhaar.aadhaarBackPhoto} />
+          <FilePreview label="Aadhaar Card Front Side Photo" file={form.files.aadhaarFrontPhoto} />
+          <FilePreview label="Aadhaar Card Back Side Photo" file={form.files.aadhaarBackPhoto} />
         </div>
       </Section>
 
@@ -501,7 +516,7 @@ console.log("formdata",formData);
         />
         <FilePreview
           label="Upload Permanent Address Proof (Minimum Last 10 Years Address proof)"
-          file={form.address.addressProofFile}
+          file={form.files.addressProofFile}
         />
       </Section>
 
