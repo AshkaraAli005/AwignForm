@@ -372,7 +372,7 @@ console.log("formdata",formData);
         </DialogContent>
       </Dialog>
       {verifications.some(v => !v.match) && (
-  <Card className="p-6 border-2 border-orange-500/50 backdrop-blur-xl bg-orange-500/5">
+  <div className="border-none">
     <div className="flex items-center gap-3 mb-4">
       <AlertTriangle className="w-6 h-6 text-orange-500" />
       <h3 className="text-lg font-bold">Fields Requiring Attention</h3>
@@ -405,12 +405,10 @@ console.log("formdata",formData);
           }
         };
 
-        console.log(v.document)
-
         return (
           <div
             key={i}
-            className="p-4 rounded-xl bg-card border border-border cursor-pointer hover:border-primary/50 transition-all"
+            className=" p-6 border-2 bg-[#fffbf5] border-orange-500/50 backdrop-blur-xl rounded-xl bg-card  cursor-pointer hover:shadow-lg transition-all"
             // onClick={scrollToField}
           >
             <div>
@@ -421,14 +419,10 @@ console.log("formdata",formData);
                 <p className="text-sm text-muted-foreground">From {v.document}</p>
                 {/* <p className="text-xs text-primary mt-1">Click to edit</p> */}
               </div>
-              <button className="rounded-md px-4 gap-2 py-1" style={{border:"1px solid #d1d5db", display:'flex', alignItems:"center",}}>
+              <button className="rounded-md px-4 gap-2 h-8 py-1 hover:bg-primary/10 hover:shadow-md"  style={{border:"1px solid #d1d5db", display:'flex', alignItems:"center",}}>
                 <Edit className="w-4 h-4"/> Edit
               </button>
               </div>
-
-              {/* <Badge variant="outline" className="border-orange-500 text-orange-500">
-                {v.matchPercentage}% match
-              </Badge> */}
             </div>
 
             <Separator className="my-3" />
@@ -436,29 +430,29 @@ console.log("formdata",formData);
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-muted-foreground mb-1">You entered:</p>
-                <p className="font-semibold">{v.value}</p>
+                <p className="font-semibold text-[16px]">{v.value}</p>
               </div>
               <div>
                 <p className="text-muted-foreground mb-1">Document shows:</p>
-                <p className="font-semibold">{v.documentValue}</p>
+                <p className="font-semibold text-[16px]">{v.documentValue}</p>
               </div>
             </div>
           </div>
-          <div className="mt-2">
-          <FilePreview file={v.document.toLowerCase().includes("pan")?form.files.panCardFrontPhoto:form.files.aadhaarFrontPhoto} />
+          <div className="mt-6">
+          <FilePreview  handleViewClick={(imgUrl) => {setPreviewImage(imgUrl)}} file={v.document.toLowerCase().includes("pan")?form.files.panCardFrontPhoto:form.files.aadhaarFrontPhoto} canChange={false}/>
           </div>
           </div>
         );
       })}
     </div>
-  </Card>
+  </div>
 )}
 
 
 
       <Section title="Basic Details" icon={User} stepNumber={0}>
         {/* {getVerificationRes(basicVerifications)} */}
-         <Separator className="my-3" />
+         {/* <Separator className="my-3" /> */}
         <Field label="Full Name" value={form.basicDetails.fullName} />
         <Field label="Mobile number" value={form.basicDetails.mobileNumber} />
         <Field label="Alternate Mobile Number" value={form.basicDetails.alternateMobileNumber} />
@@ -468,8 +462,8 @@ console.log("formdata",formData);
         <Field label="Mother's Name" value={form.basicDetails.motherName} />
         <Field label="Father's Name" value={form.basicDetails.fatherName} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-          <FilePreview label="Passport size photo" file={form.files.passportPhoto} />
-          <FilePreview label="Your signature's photo" file={form.files.signaturePhoto} />
+          <FilePreview label="Passport size photo" file={form.files.passportPhoto} handleViewClick={(imgUrl) => {setPreviewImage(imgUrl)}}/>
+          <FilePreview label="Your signature's photo" file={form.files.signaturePhoto} handleViewClick={(imgUrl) => {setPreviewImage(imgUrl)}} />
         </div>
       </Section>
 
@@ -479,14 +473,15 @@ console.log("formdata",formData);
         <FilePreview
           label="Upload Final Marksheet or Passing Certificate of Highest Qualification"
           file={form.qualification.marksheetFile}
+          handleViewClick={(imgUrl) => {setPreviewImage(imgUrl)}}
         />
       </Section>
 
       <Section title="Aadhaar Details" icon={CreditCard} stepNumber={2}>
         <Field label="Aadhaar Card Number" value={form.aadhaar.aadhaarNumber} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-          <FilePreview label="Aadhaar Card Front Side Photo" file={form.files.aadhaarFrontPhoto} />
-          <FilePreview label="Aadhaar Card Back Side Photo" file={form.files.aadhaarBackPhoto} />
+          <FilePreview label="Aadhaar Card Front Side Photo" handleViewClick={(imgUrl) => {setPreviewImage(imgUrl)}} file={form.files.aadhaarFrontPhoto} canChange={false} />
+          <FilePreview label="Aadhaar Card Back Side Photo" handleViewClick={(imgUrl) => {setPreviewImage(imgUrl)}} file={form.files.aadhaarBackPhoto} canChange={false} />
         </div>
       </Section>
 
@@ -494,10 +489,12 @@ console.log("formdata",formData);
         {/* {getVerificationRes(panVerifications)} */}
         <Field label="PAN Card Number" value={form.panCard.panCardNumber} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-          <FilePreview label="PAN Card Front Side Photo" file={form.panCard.panCardFrontPhoto} />
+          <FilePreview label="PAN Card Front Side Photo" file={form.files.panCardFrontPhoto} handleViewClick={(imgUrl) => {setPreviewImage(imgUrl)}}/>
           <FilePreview
             label="PAN Card Back Side Photo"
-            file={form.panCard.passingCertificate}
+            file={form.files.passingCertificate}
+            canChange={false}
+            handleViewClick={(imgUrl) => {setPreviewImage(imgUrl)}}
           />
         </div>
       </Section>
@@ -513,10 +510,13 @@ console.log("formdata",formData);
         <Field
           label="Permanent Address Same as Current Address"
           value={form.address.permanentSameAsCurrent}
+          canChange={false}
         />
         <FilePreview
           label="Upload Permanent Address Proof (Minimum Last 10 Years Address proof)"
           file={form.files.addressProofFile}
+          canChange={false}
+          handleViewClick={(imgUrl) => {setPreviewImage(imgUrl)}}
         />
       </Section>
 

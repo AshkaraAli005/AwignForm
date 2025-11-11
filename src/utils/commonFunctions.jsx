@@ -197,7 +197,7 @@ export const convertToFormData = (data, formData = new FormData(), parentKey = "
 };
 
 
-export const FilePreview = ({ label, file, handleViewClick, onFileChange, isFileLoading,accept="image/*" }) => {
+export const FilePreview = ({ label, file, handleViewClick, onFileChange, isFileLoading,accept="image/*" ,canChange = true }) => {
   if (!file || Object.keys(file).length === 0) return null;
 
   const fileInputRef = useRef(null);
@@ -232,7 +232,7 @@ export const FilePreview = ({ label, file, handleViewClick, onFileChange, isFile
       )}
 
       <div
-        className="relative group cursor-pointer rounded-xl border-2 border-border/50 hover:border-primary/50 transition-all overflow-hidden bg-secondary/30 hover:shadow-lg"
+        className="relative bg-white group cursor-pointer rounded-xl border-2 border-border/50 hover:border-primary/50 transition-all overflow-hidden bg-secondary/30 hover:shadow-lg"
         onClick={() => isImage && handleViewClick && handleViewClick(fileUrl)}
       >
         {isFileLoading && !isImage && 
@@ -293,7 +293,7 @@ export const FilePreview = ({ label, file, handleViewClick, onFileChange, isFile
         )}
 
         {/* Footer section */}
-        <div className="p-3 rounded-b-md bg-background/80 backdrop-blur-sm border-t border-border/50 flex items-center justify-between">
+        <div className="p-3 rounded-b-md bg-background/80 backdrop-blur-sm border-t border-border/50 flex flex-col sm:flex-row items-center justify-between">
           <div>
             <p className="text-xs text-muted-foreground truncate">{fileName}</p>
             {fileSize && (
@@ -302,7 +302,7 @@ export const FilePreview = ({ label, file, handleViewClick, onFileChange, isFile
           </div>
 
           {/* Change File button */}
-          <div className="flex items-center gap-2">
+          {canChange &&<div className="flex items-center gap-2">
             <input
               ref={fileInputRef}
               type="file"
@@ -318,12 +318,12 @@ export const FilePreview = ({ label, file, handleViewClick, onFileChange, isFile
                 e.preventDefault();
                 fileInputRef.current?.click();
               }}
-              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg border border-border hover:border-primary hover:bg-primary/5 transition-all"
+              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg border border-border hover:border-primary hover:bg-primary/5 transition-all w-full sm:w-auto"
             >
               <Upload className="w-4 h-4" />
               Change File
             </button>
-          </div>
+          </div>}
         </div>
       </div>
     </div>

@@ -48,6 +48,15 @@ const Index = () => {
     { number: 6, title: "References", isCompleted: currentStep > 5, isActive: currentStep === 5, icon: Users },
     { number: 7, title: "Summary", isCompleted: currentStep > 6, isActive: currentStep === 6, icon: ClipboardCheck },
   ];
+    const stepsMobile = [
+    { number: 1, title: "Basic", isCompleted: currentStep > 0, isActive: currentStep === 0, icon: User },
+    { number: 2, title: "Education", isCompleted: currentStep > 1, isActive: currentStep === 1, icon: GraduationCap },
+    { number: 3, title: "Aadhaar", isCompleted: currentStep > 2, isActive: currentStep === 2, icon: CreditCard },
+    { number: 4, title: "PAN", isCompleted: currentStep > 3, isActive: currentStep === 3, icon: FileText },
+    { number: 5, title: "Address", isCompleted: currentStep > 4, isActive: currentStep === 4, icon: Home },
+    { number: 6, title: "References", isCompleted: currentStep > 5, isActive: currentStep === 5, icon: Users },
+    { number: 7, title: "Summary", isCompleted: currentStep > 6, isActive: currentStep === 6, icon: ClipboardCheck },
+  ];
 
   const stepTitles = [
     "Personal Information",
@@ -374,7 +383,7 @@ useEffect(() => {
           {/* Vertical Stepper Sidebar (Desktop) - Scrollable */}
           {/* <FormStepper steps={steps} onStepClick={handleStepClick} /> */}
               {/* <div className="lg:w-1/4 w-full lg:sticky lg:top-[100px] self-start"> */}
-      <FormStepper steps={steps} onStepClick={handleStepClick} />
+      <FormStepper steps={steps} onStepClick={handleStepClick}  stepsMobile={stepsMobile}/>
     {/* </div> */}
 
           {/* Form Content */}
