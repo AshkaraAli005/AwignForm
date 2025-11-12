@@ -8,7 +8,10 @@ import {
   X,
   Loader2,
   Upload,
+  Copy,
 } from "lucide-react";
+import { updateAadhaar, updatePanCard } from "../Store/formSlice";
+import { toast } from "sonner";
 
 
 
@@ -38,7 +41,7 @@ export const validationRules = {
 };
 
  
- export const getVerificationRes = (verifications) => {
+ export const getVerificationRes = (verifications, dispatch) => {
 
     if (!verifications || verifications.length === 0) return null
     return(
@@ -55,7 +58,7 @@ export const validationRules = {
                     const getFieldSection = (fieldName) => {
                       if (fieldName.toLowerCase().includes("full name")) {
                         return {
-                          sectionId: "basic",
+                          sectionId: "basicDetails",
                           fieldKey: "fullName",
                         };
                       }
@@ -74,10 +77,10 @@ export const validationRules = {
                           fieldKey: "panCardNumber",
                         };
                       }
-                      if (fieldName.toLowerCase().includes("aadhaar")) {
+                      if (fieldName.toLowerCase().includes("aadhaar number")) {
                         return {
                           sectionId: "aadhaar",
-                          fieldKey: "",
+                          fieldKey: "aadhaarNumber",
                         };
                       }
                       return {
@@ -99,6 +102,26 @@ export const validationRules = {
                         );
                       }
                     }; */}
+
+                    const handleCopyAndUpdate = (fieldName, value) => {
+                      const fieldSection = getFieldSection(fieldName);
+                  console.log(fieldName, value);
+                      // Copy to clipboard
+                      navigator.clipboard.writeText(value).then(() => {
+                        toast.success("Copied and updated successfully!");
+                      });
+                  
+                      // Dispatch Redux update
+                      // if (fieldSection.action && fieldSection.key) {
+                        console.log(fieldSection.fieldKey)
+                        if(fieldSection.fieldKey === "aadhaarNumber"){
+                          dispatch(updateAadhaar({aadhaarNumber:value}));
+                        }if(fieldSection.fieldKey === "panCardNumber"){
+                          console.log("panCardNumber")
+                          dispatch(updatePanCard({panCardNumber:value}));
+                        }
+                      // }
+                    };
     
                     return (
                       <div
@@ -123,19 +146,33 @@ export const validationRules = {
                           </Badge> */}
                         </div>
                         <Separator className="my-3" />
-                        <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className=" flex flex-col sm:grid grid-cols-2 gap-4 text-sm">
                           <div>
                             <p className="text-muted-foreground mb-1">
                               You entered:
                             </p>
                             <p className="font-semibold">{v.value}</p>
                           </div>
-                          <div>
+                          {/* <div>
                             <p className="text-muted-foreground mb-1">
                               Document shows:
                             </p>
                             <p className="font-semibold">{v.documentValue}</p>
-                          </div>
+                          </div> */}
+                                           <div>
+                    <p className="text-muted-foreground mb-1 flex items-center justify-between">
+                      Document shows:
+                    </p>
+                    <p className="font-semibold flex items-center">{v.documentValue} 
+                    <button
+                        onClick={() => handleCopyAndUpdate(v.field, v.documentValue)}
+                        className="ml-2 p-1 rounded-md  transition"
+                        title="Copy & Update"
+                      >
+                        <Copy className="w-4 h-4 text-primary" />
+                      </button>
+                    </p>
+                  </div>
                         </div>
                       </div>
                     );
@@ -283,14 +320,14 @@ export const FilePreview = ({ label, file, handleViewClick, onFileChange, isFile
         {/* Footer section */}
         <div className="p-3 rounded-b-md bg-background/80 backdrop-blur-sm border-t border-border/50 flex flex-col sm:flex-row items-center justify-between">
           <div>
-            <p className="text-xs text-muted-foreground truncate">{fileName}</p>
+            <p className="text-xs text-muted-foreground truncate break-all whitespace-normal w-full">{fileName}</p>
             {fileSize && (
-              <p className="text-xs text-muted-foreground">{fileSize}</p>
+              <p className="text-xs text-muted-foreground text-wrap w-full">{fileSize}</p>
             )}
           </div>
 
           {/* Change File button */}
-          {canChange &&<div className="flex items-center gap-2">
+          {canChange &&<div className="flex items-center gap-2 w-full sm:w-auto">
             <input
               ref={fileInputRef}
               type="file"
@@ -306,7 +343,7 @@ export const FilePreview = ({ label, file, handleViewClick, onFileChange, isFile
                 e.preventDefault();
                 fileInputRef.current?.click();
               }}
-              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg border border-border hover:border-primary hover:bg-primary/5 transition-all w-full sm:w-auto"
+              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg border border-border hover:border-primary hover:bg-primary/5 transition-all w-full sm:w-fit mt-2 sm:mt-0 justify-center"
             >
               <Upload className="w-4 h-4" />
               Change File

@@ -207,6 +207,7 @@ const BasicDetailsStep = () => {
                   ? new Date(basicDetails.dateOfBirth)
                   : null
               }
+              format="dd/MM/yyyy"
               disableFuture
               minDate={new Date("1900-01-01")}
               onChange={(newDate) => {

@@ -38,15 +38,17 @@ const PanCardStep = () => {
   };
 
 
-  const isValidImage = !formData?.validationsData?.pan_validation?.defaultData?.message.toLowerCase().includes("invalid pan format")
+  // const isValidImage = !formData?.validationsData?.pan_validation?.defaultData?.message.toLowerCase().includes("invalid pan format")
+  const isValidImage = formData?.validationsData?.pan_validation?.defaultData?.format_valid
+
 
   return (
     <div className="space-y-6">
-      {formData?.validationsData?.pan_validation?.match === false && isValidImage && getVerificationRes([formData.validationsData.pan_validation])}
-        {formData?.validationsData?.pan_validation?.defaultData?.message.toLowerCase().includes("invalid pan format")  && <div className="border-orange-200 bg-orange-50 flex px-6 py-5 gap-3 " style={{border:"1px solid #fff7ed !important"}}>
+      {formData?.validationsData?.pan_validation?.match === false && isValidImage && getVerificationRes([formData.validationsData.pan_validation], dispatch)}
+        {formData?.validationsData?.pan_validation?.defaultData?.format_valid === false  && <div className=" bg-orange-50 rounded-sm shadow-md flex px-6 py-5 gap-3 " style={{border:"1px solid #ffb456"}}>
 <AlertTriangle className="w-6 h-6 text-orange-500" />
 <div className="text-orange-800 dark:text-orange-200 font-medium">
-   Important: The uploaded file is not valid or clear . Please upload a valid image.
+    Important: The uploaded file is not valid or clear . Please upload a valid image.
 </div>
       </div>}
       <div>

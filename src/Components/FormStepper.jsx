@@ -104,7 +104,7 @@ const FormStepper = ({ steps, onStepClick, stepsMobile }) => {
                 <div
                   className={cn(
                     "relative flex items-start gap-4 px-3 py-2 rounded-xl transition-all duration-300",
-                    step.isActive && "scale-105",
+                    // step.isActive && "scale-105",
                     (step.isCompleted || step.isActive) && onStepClick && "cursor-pointer hover:bg-accent/5",
                     !step.isActive && !step.isCompleted && "hover:bg-muted/30"
                   )}
@@ -114,7 +114,7 @@ const FormStepper = ({ steps, onStepClick, stepsMobile }) => {
                   <div
                     className={cn(
                       "relative w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-500 border-2 flex-shrink-0",
-                      step.isActive && "gradient-primary border-transparent text-white shadow-glow animate-pulse-glow ml-1",
+                      step.isActive && "gradient-primary  text-white ",
                       step.isCompleted && !step.isActive && "bg-gradient-to-br from-green-400 to-green-600 text-white shadow-lg",
                       //  bg-[linear-gradient(95deg,_rgb(242,113,33)_0%,_rgb(233,64,87)_50%,_rgb(138,35,135)_100%)]
                       
@@ -132,9 +132,9 @@ const FormStepper = ({ steps, onStepClick, stepsMobile }) => {
                     )}
                     
                     {/* Active Glow Ring */}
-                    {step.isActive && (
+                    {/* {step.isActive && (
                       <div className="absolute inset-0 rounded-full gradient-primary opacity-20 animate-ping" />
-                    )}
+                    )} */}
                   </div>
 
                   {/* Step Info */}

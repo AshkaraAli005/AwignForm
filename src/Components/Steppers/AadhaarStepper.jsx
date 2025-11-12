@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { AlertTriangle, CreditCard } from "lucide-react";
 import FormField from "../FormField";
@@ -20,6 +20,9 @@ const AadhaarStep = () => {
       ? aadhaar.aadhaarNumber.replace(/(\d{4})(?=\d)/g, "$1 ").trim()
       : ""
   );
+
+  const isValidImage = formData?.validationsData?.aadhaarValidations?.defaultData?.format_valid === true
+
   
 
   const handleAadhaarChange = (value) => {
@@ -30,18 +33,25 @@ const AadhaarStep = () => {
     dispatch(updateAadhaar({ aadhaarNumber: formattedValue }));
   };
 
-    const isValidImage = !formData?.validationsData?.aadhaarValidations?.defaultData?.message.toLowerCase().includes("aadhaar number must be 12 digits")
+  useEffect(()=>{
+    if(aadhaar.aadhaarNumber){
+      handleAadhaarChange(aadhaar.aadhaarNumber)
+    }
+  },[aadhaar.aadhaarNumber])
+
+    // const isValidImage = !formData?.validationsData?.aadhaarValidations?.defaultData?.message.toLowerCase().includes("aadhaar number must be 12 digits")
 
   return (
     <div className="space-y-6">
-      {formData?.validationsData?.aadhaarValidations?.match === false && isValidImage && getVerificationRes([formData.validationsData.aadhaarValidations])}
+      {formData?.validationsData?.aadhaarValidations?.match === false && isValidImage && getVerificationRes([formData.validationsData.aadhaarValidations], dispatch)}
 
-      { !isValidImage && <div className="border-orange-200 bg-orange-50 flex px-6 py-5 gap-3 " style={{border:"1px solid #fff7ed !important"}}>
-<AlertTriangle className="w-6 h-6 text-orange-500" />
-<div className="text-orange-800 dark:text-orange-200 font-medium">
-    Important: The uploaded file is not valid or clear . Please upload a valid image.
-</div>
-      </div>}
+      { formData?.validationsData?.aadhaarValidations?.defaultData?.format_valid === false && 
+      <div className=" bg-orange-50 rounded-sm shadow-md flex px-6 py-5 gap-3 " style={{border:"1px solid #ffb456"}}>
+      <AlertTriangle className="w-6 h-6 text-orange-500" />
+      <div className="text-orange-800 dark:text-orange-200 font-medium">
+          Important: The uploaded file is not valid or clear . Please upload a valid image.
+      </div>
+            </div>}
       <FormField
         icon={CreditCard}
         label="Aadhaar Card Number"
@@ -83,7 +93,7 @@ const AadhaarStep = () => {
           uploadAwignaFile(id, file, "aadhaarBackPhoto").then((response) => {
             dispatch(updateFiles({aadhaarBackPhoto: response.data.files.aadhaarBackPhoto}));
             dispatch(updateLoadingFiles({aadhaarBackPhoto: false}))
-            initiateOcrExtract(id)
+            // initiateOcrExtract(id)
           })
 
         }}

@@ -11,7 +11,7 @@ import NeighbourStep from "../Components/Steppers/NeighboursStep";
 import SummaryStep from "../Components/Steppers/SummaryStep";
 import RoleSelection from "./RoleSelection";
 import { useAppDispatch, useAppSelector } from "../Store/hooks";
-import { nextStep, prevStep,setCurrentStep, setHasCompletedExServiceman, setHasSelectedRole, updateAadhaar, updateAddress, updateBasicDetails, updateFiles, updateLoadingFiles, updateNeighbour, updatePanCard, updateQualification, updateValidations, updateValidationsData } from "../Store/formSlice";
+import { nextStep, prevStep,setCurrentStep, setHasCompletedExServiceman, setHasSelectedRole, setIsValidationLoading, updateAadhaar, updateAddress, updateBasicDetails, updateFiles, updateLoadingFiles, updateNeighbour, updatePanCard, updateQualification, updateValidations, updateValidationsData } from "../Store/formSlice";
 import { toast } from "../Components/Ui/sonner";
 import { cn } from "../lib/utils";
 import { getStepValidationMessage, validateStep } from "../utils/formValidation";
@@ -21,6 +21,8 @@ import AwignLogo from "../assets/AwignLogo.png";
 import { useNavigate, useParams } from "react-router-dom";
 import { getAwignFormData, updateAwignFormData, validateDataApi } from "../services/api";
 import ExServicemanStep from "../Components/Steppers/ExServicemanStep";
+import { extractInvalidFields } from "../utils/helperFunctions";
+import { CircularProgress } from "@mui/material";
 
 const Index = () => {
     const { id } = useParams();
@@ -42,8 +44,8 @@ const Index = () => {
   const steps = [
     { number: 1, title: "Basic Details", isCompleted: currentStep > 0, isActive: currentStep === 0, icon: User },
     { number: 2, title: "Education Details", isCompleted: currentStep > 1, isActive: currentStep === 1, icon: GraduationCap },
-    { number: 3, title: "Aadhaar", isCompleted: currentStep > 2, isActive: currentStep === 2, icon: CreditCard },
-    { number: 4, title: "PAN Card", isCompleted: currentStep > 3, isActive: currentStep === 3, icon: FileText },
+    { number: 3, title: "Aadhaar Proof", isCompleted: currentStep > 2, isActive: currentStep === 2, icon: CreditCard },
+    { number: 4, title: "PAN Proof", isCompleted: currentStep > 3, isActive: currentStep === 3, icon: FileText },
     { number: 5, title: "Address Details", isCompleted: currentStep > 4, isActive: currentStep === 4, icon: Home },
     { number: 6, title: "References", isCompleted: currentStep > 5, isActive: currentStep === 5, icon: Users },
     { number: 7, title: "Summary", isCompleted: currentStep > 6, isActive: currentStep === 6, icon: ClipboardCheck },
@@ -131,6 +133,7 @@ try {
             cleanedFormState[stepMap[currentStep]] || cleanedFormState,
           currentStep: currentStep + 1,
         });
+        dispatch(setIsValidationLoading(true));
 
         const res = await validateDataApi(id);
         if (res?.aadhaar_validation?.is_valid === false) {
@@ -144,16 +147,18 @@ try {
             matchPercentage: 100,
             document: "Aadhaar Card Front Image",
             defaultData: validationsData
-
           }}));
           window.scrollTo({ top: 0, behavior: 'smooth' });
+          dispatch(setIsValidationLoading(false));
           return; // ✅ Stops inside this block
         }else{
           dispatch(updateValidationsData({aadhaarValidations: {match: true}}));
           dispatch(setCurrentStep(currentStep + 1));
+          dispatch(setIsValidationLoading(false));
         }
       } catch (error) {
         toast.error("Aadhaar validation failed due to network error.");
+        dispatch(setIsValidationLoading(false));
         return;
       }
       return
@@ -166,6 +171,7 @@ try {
             cleanedFormState[stepMap[currentStep]] || cleanedFormState,
           currentStep: currentStep + 1,
         });
+        dispatch(setIsValidationLoading(true));
 
         const res = await validateDataApi(id);
         if (res?.pan_validation?.is_valid === false) {
@@ -181,19 +187,19 @@ try {
             defaultData: validationsData
           }}));
           window.scrollTo({ top: 0, behavior: 'smooth' });
+          dispatch(setIsValidationLoading(false));
           return; // ✅ Stops inside this block
         }else{
           dispatch(updateValidationsData({pan_validation: {match: true}}));
+          dispatch(setIsValidationLoading(false));
  dispatch(setCurrentStep(currentStep + 1));        }
       } catch (error) {
         toast.error("Aadhaar validation failed due to network error.");
+        dispatch(setIsValidationLoading(false));
         return;
       }
       return
-    }
-
-            
-
+    }     
             updateAwignFormData(`/${id}`, { [stepMap[currentStep]]: cleanedFormState[stepMap[currentStep]] || cleanedFormState });
             dispatch(nextStep());
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -204,6 +210,87 @@ try {
             });
           }
         };
+
+        const handleSummaryValidations = async() =>{
+          const sample = {
+            "aadhaar_validation": {
+                "extracted": "2986 4351 1833",
+                "format_valid": true,
+                "is_valid": true,
+                "matches_user_input": true,
+                "message": "Valid Aadhaar and matches user input",
+                "user_provided": "2986 4351 1833"
+            },
+            "dob_validation": {
+                "aadhaar_dob": "12/10/2004",
+                "aadhaar_dob_normalized": "12/10/2004",
+                "is_valid": false,
+                "message": "Date of Birth mismatch: User DOB '11/05/2025' vs Aadhaar '12/10/2004' vs PAN '12/10/2004'",
+                "pan_dob": "12/10/2004",
+                "pan_dob_normalized": "12/10/2004",
+                "user_dob": "11/05/2025",
+                "user_dob_normalized": "11/05/2025"
+            },
+            "errors": [
+                "Name mismatch: User 'sjfgsjd' does not match 100% with Aadhaar 'A Abdul Aleem' or PAN 'A ABDUL ALEEM'",
+                "Name mismatch: User 'asdnkj' does not match 100% with Aadhaar  PAN 'AHAMED MANSOOR'",
+                "Date of Birth mismatch: User DOB '11/05/2025' vs Aadhaar '12/10/2004' vs PAN '12/10/2004'"
+            ],
+            "father_name_validation": {
+                "is_valid": false,
+                "matches_aadhaar": false,
+                "matches_pan": false,
+                "message": "Name mismatch: User 'sjfgsjd' does not match 100% with Aadhaar or PAN 'A ABDUL ALEEM'",
+                "pan_name": "AHAMED MANSOOR",
+                "pan_similarity": 21.05,
+                "user_provided_name": "asdnkj"
+            },
+            "name_validation": {
+                "aadhaar_name": "A Abdul Aleem",
+                "aadhaar_similarity": 11.11,
+                "is_valid": false,
+                "matches_aadhaar": false,
+                "matches_pan": false,
+                "message": "Name mismatch: User 'sjfgsjd' does not match 100% with Aadhaar 'A Abdul Aleem' or PAN 'A ABDUL ALEEM'",
+                "pan_name": "A ABDUL ALEEM",
+                "pan_similarity": 11.11,
+                "user_provided_name": "sjfgsjd"
+            },
+            "overall_status": "invalid",
+            "pan_validation": {
+                "extracted": "FWFPA3335C",
+                "format_valid": true,
+                "is_valid": true,
+                "matches_user_input": true,
+                "message": "Valid Pan and matches user input",
+                "user_provided": "FWFPA3335C"
+            },
+            "reference_id": "864e9b62-5304-420d-a7d3-bce36fcada3d",
+            "warnings": []
+        }
+         
+        console.log(id, sample);
+          dispatch(setIsValidationLoading(true));
+          const res = await validateDataApi(id);
+          try{
+            dispatch(updateValidationsData({completeValidations: res, extractedInvalidFields: extractInvalidFields(res)}));
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            dispatch(setIsValidationLoading(false));
+            // dispatch(updateValidationsData({completeValidations: sample, extractedInvalidFields: extractInvalidFields(sample)}));
+            setIsLoading(false);
+          }catch(err){
+
+          }
+
+          
+        }
+
+
+        useEffect(() => {
+          if(currentStep === 6){
+            handleSummaryValidations();
+          }
+        }, [currentStep])
       
         const handleStepClick = (stepNumber) => {
           // Allow navigation to previous steps or current step
@@ -225,6 +312,8 @@ try {
   };
 
 }
+
+console.log(formState)
 
 useEffect(() => {
   if(id){
@@ -297,6 +386,7 @@ useEffect(() => {
     return (
       <div className="min-h-screen relative overflow-hidden">
         {/* Animated Background */}
+
         <div className="fixed inset-0 -z-10">
           <div className="absolute inset-0 bg-gradient-to-br from-background via-secondary/30 to-accent/20" />
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" />
@@ -397,6 +487,20 @@ useEffect(() => {
           </div>
         </div>
       </header> */}
+      {(formState.isSummaryLoading || formState.isValidationLoading) && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-[3px] bg-black/10">
+    <div className="flex flex-col items-center gap-4">
+      {/* Spinner */}
+      <CircularProgress sx={{ height: "80px", width: "80px" }} />
+
+      {/* Text */}
+      {/* <p className="text-white text-lg font-medium animate-pulse drop-shadow-lg">
+        Please wait...
+      </p> */}
+    </div>
+  </div>
+)}
+
         
         <header id="main-header" className="relative border-b border-border/50 backdrop-blur-xl bg-card/50  top-0 z-30">
          <div className="container mx-2 px-6 py-3">

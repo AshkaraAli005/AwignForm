@@ -165,6 +165,7 @@ const AddressStep = () => {
           <FormField
             // icon={Home}
             label="House Number"
+            placeholder={"Enter House No."}
             required
             value={address.houseNumber}
             onChange={(value) => dispatch(updateAddress({ houseNumber: value }))}
@@ -172,6 +173,7 @@ const AddressStep = () => {
           <FormField
             // icon={MapPin}
             label="Street Name"
+            placeholder={"Enter Street Name"}
             required
             value={address.streetName}
             onChange={(value) => dispatch(updateAddress({ streetName: value }))}
@@ -179,6 +181,7 @@ const AddressStep = () => {
           <FormField
             // icon={MapPin}
             label="Locality"
+            placeholder={"Enter Locality"}
             required
             value={address.locality}
             onChange={(value) => dispatch(updateAddress({ locality: value }))}
@@ -187,12 +190,14 @@ const AddressStep = () => {
             // icon={MapPin}
             label="Landmark"
             required
+            placeholder={"Enter Landmark"}
             value={address.landmark}
             onChange={(value) => dispatch(updateAddress({ landmark: value }))}
           />
           <FormField
             // icon={MapPin}
             label="District"
+            placeholder={"Enter District"}
             required
             value={address.district}
             onChange={(value) => dispatch(updateAddress({ district: value }))}
@@ -259,6 +264,7 @@ const AddressStep = () => {
             // icon={Hash}
             label="Pincode"
             required
+            placeholder={"Enter 6 digit pincode"}
             type="text"
             value={address.pincode}
             onChange={(value) => dispatch(updateAddress({ pincode: value }))}

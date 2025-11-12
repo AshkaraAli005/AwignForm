@@ -6,6 +6,8 @@ const initialState = {
   hasCompletedPreSteps: false,
   hasCompletedExServiceman: false,
   fromEditClick: false,
+  isSummaryLoading: false,
+  isValidationLoading: false,
 
   onboardingChannel: {
     channel: "",
@@ -198,6 +200,12 @@ const formSlice = createSlice({
     updateValidationsData: (state, action) => {
       state.validationsData = { ...state.validationsData, ...action.payload };
     },
+    setSummaryLoading: (state, action) => {
+      state.isSummaryLoading = action.payload;
+    },
+    setIsValidationLoading: (state, action) => {
+      state.isValidationLoading = action.payload;
+    },
 
     resetForm: () => initialState,
   },
@@ -226,7 +234,9 @@ export const {
   updateValidations,
   updateValidationsData,
   updateExServiceman,
-  setHasCompletedExServiceman
+  setHasCompletedExServiceman,
+  setSummaryLoading,
+  setIsValidationLoading
 
 } = formSlice.actions;
 
