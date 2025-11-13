@@ -123,6 +123,15 @@ const BasicDetailsStep = () => {
     validateField(field, value);
   };
 
+  const parseDDMMYYYY = (str) => {
+    if (!str) return null;
+    const [d, m, y] = str.split("/");
+    const date = new Date(y, m - 1, d);
+  
+    // Validate constructed date
+    return isNaN(date) ? null : date;
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -202,10 +211,7 @@ const BasicDetailsStep = () => {
       </div>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DatePicker
-              value={
-                basicDetails.dateOfBirth
-                  ? new Date(basicDetails.dateOfBirth)
-                  : null
+              value={parseDDMMYYYY(basicDetails.dateOfBirth)
               }
               format="dd/MM/yyyy"
               disableFuture
@@ -214,9 +220,11 @@ const BasicDetailsStep = () => {
                 if (newDate) {
                   dispatch(
                     updateBasicDetails({
-                      dateOfBirth: format(newDate, "yyyy-MM-dd"),
+                      dateOfBirth: format(newDate, "dd/MM/yyyy"),
                     })
                   );
+                } else {
+                  dispatch(updateBasicDetails({ dateOfBirth: "" }));
                 }
               }}
               sx={{ "& .MuiPickersInputBase-root":{
