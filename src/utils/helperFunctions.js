@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import { setHasCompletedExServiceman, setHasSelectedRole, setSummaryLoading, updateAadhaar, updateAddress, updateBasicDetails, updateFiles, updateNeighbour, updatePanCard, updateQualification, updateValidationsData } from "../Store/formSlice";
+import { setHasCompletedExServiceman, setHasSelectedRole, setSummaryLoading, updateAadhaar, updateAddress, updateBasicDetails, updateFiles, updateLoadingFiles, updateNeighbour, updatePanCard, updateQualification, updateValidationsData } from "../Store/formSlice";
 import { useAppDispatch } from "../Store/hooks";
 import { getAwignFormData, updateAwignFormData, validateDataApi } from "../services/api";
 
@@ -135,7 +135,7 @@ export const extractInvalidFields = (data) => {
           dispatch(updateNeighbour(data?.neighbour));
           dispatch(updateFiles(data?.files));
           // dispatch(setCurrentStep(res?.current_page));
-          dispatch(updateLoadingFiles({
+          dispatch(updateLoadingFilesa({
             aadhaarFrontPhoto: false,
             aadhaarBackPhoto: false,
             panCardPhoto: false,

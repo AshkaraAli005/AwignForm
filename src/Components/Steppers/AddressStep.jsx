@@ -265,7 +265,7 @@ const AddressStep = () => {
             label="Pincode"
             required
             placeholder={"Enter 6 digit pincode"}
-            type="text"
+            type="number"
             value={address.pincode}
             onChange={(value) => dispatch(updateAddress({ pincode: value }))}
           />
