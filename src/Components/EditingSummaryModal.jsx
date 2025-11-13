@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "./Ui/dialog";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { IconButton } from "@mui/material";
-import { ZoomIn, ZoomOut, RotateCcw, Check, X, ZoomInIcon } from "lucide-react";
+import { ZoomIn, ZoomOut, RotateCcw, Check, X, ZoomInIcon, Copy } from "lucide-react";
 import { format, isValid, parse } from "date-fns";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
@@ -26,6 +26,15 @@ const EditFieldModal = ({
   };
 
   console.log(fieldValue)
+
+                      const handleCopyAndUpdate = ( value) => {
+                      onChange(value)
+                      navigator.clipboard.writeText(value).then(() => {
+                        toast.success("Copied and updated successfully!");
+                      });
+                  
+                      // }
+                    };
 
 
   const parsedDate = isDateField && fieldValue
@@ -52,45 +61,21 @@ const EditFieldModal = ({
           <div className="space-y-5">
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">Document Shows:</p>
-            <p className="font-semibold text-[16px]">{allValues?.documentValue}</p>
+            {/* <p className="font-semibold text-[16px]">{allValues?.documentValue}</p> */}
+                                <p className="font-semibold flex items-center">{allValues?.documentValue} 
+                    <button
+                        onClick={() => handleCopyAndUpdate(allValues?.documentValue)}
+                        className="ml-2 p-1 rounded-md  transition"
+                        title="Copy & Update"
+                      >
+                        <Copy className="w-4 h-4 text-primary" />
+                      </button>
+                    </p>
           </div>
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">You entered:</p>
             {isDateField ? (
-            //   <LocalizationProvider dateAdapter={AdapterDateFns}>
-            //   <DatePicker
-            //     value={isValid(parsedDate) ? parsedDate : null} // ✅ Ensure valid
-            //     disableFuture
-            //     // onChange={(newDate) => {
-            //     //   if (newDate) {
-            //     //     // Always store as dd/MM/yyyy or yyyy-MM-dd as per your backend
-            //     //     onChange(format(newDate, "dd/MM/yyyy"));
-            //     //   }
-                  
-            //     // }}
-            //     onChange={(newDate) => {
-            //         if (newDate) {
-            //             onchange(format(newDate, "dd/MM/yyyy"));
-            //         //   dispatch(
-            //         //     updateBasicDetails({
-            //         //       dateOfBirth: format(newDate, "yyyy-MM-dd"),
-            //         //     })
-            //         //   );
-            //         }
-            //       }}
-            //     slotProps={{
-            //       textField: {
-            //         size: "small",
-            //         fullWidth: true,
-            //         sx: {
-            //           "& .MuiOutlinedInput-root": {
-            //             borderRadius: "0.75rem",
-            //           },
-            //         },
-            //       },
-            //     }}
-            //   />
-            // </LocalizationProvider>
+
             <LocalizationProvider dateAdapter={AdapterDateFns}>
   <DatePicker
     value={parsedDate}

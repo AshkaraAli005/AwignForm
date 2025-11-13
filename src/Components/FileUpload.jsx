@@ -200,52 +200,88 @@ const FileUpload = ({
           <div className="space-y-3">
             {loading && (
               <FilePreview isFileLoading={loading}/>  )}
-            {selectedFiles.map((file, index) => (
-              multiple ? <div
-                key={index}
-                className="flex items-center justify-between gap-4 p-4 rounded-xl bg-card border border-border shadow-sm animate-scale-in"
-              >
-                <div className="flex items-center gap-4 flex-1 min-w-0">
-                  {previews[index] ? (
-                    <div className="relative group">
-                      <img
-                        src={previews[index]}
-                        alt="Preview"
-                        className="w-20 h-20 object-cover rounded-xl shadow-md ring-2 ring-primary/20"
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-xl transition-colors" />
-                    </div>
-                  ) : (
-                    <div className="w-20 h-20 rounded-xl gradient-primary flex items-center justify-center shadow-md">
-                      <FileCheck className="w-8 h-8 text-white" />
-                    </div>
-                  )}
+{selectedFiles.map((file, index) => {
+  if (multiple) {
+    const isSignedUrl = file && typeof file === "object" && file.signed_url; // Adjust if your file objects have a 'url' key
+      const fileUrl =  file?.signed_url || (file instanceof File ? URL.createObjectURL(file) : null);
+      const fileName = file?.name || file?.public_url?.split("/").pop() || "file";
 
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">
-                      {file.name}
-                    </p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-muted-foreground">
-                        {formatFileSize(file.size)}
-                      </span>
-                      <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
-                        <FileCheck className="w-3 h-3" />
-                        <span className="text-xs font-medium">Ready</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+    return (
+      <div
+        key={index}
+        className="flex items-center justify-between gap-4 p-4 rounded-xl bg-card border border-border shadow-sm animate-scale-in"
+      >
+        <div className="flex items-center gap-4 flex-1 min-w-0">
+        {((isSignedUrl && file.file_type === "application/pdf") ||  (file instanceof File && !file?.type?.startsWith("image/"))) ? (
+          <div className="w-20 h-20 rounded-xl gradient-primary flex items-center justify-center shadow-md">
+              <FileCheck className="w-8 h-8 text-white" />
+            </div>
+        ):
+        <div className="relative group">
+              <img
+                src={fileUrl}
+                alt="Preview"
+                className="w-20 h-20 object-cover rounded-xl shadow-md ring-2 ring-primary/20"
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-xl transition-colors" />
+            </div>
+        }
+          {/* {previews[index] ? (
+            <div className="relative group">
+              <img
+                src={fileUrl}
+                alt="Preview"
+                className="w-20 h-20 object-cover rounded-xl shadow-md ring-2 ring-primary/20"
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-xl transition-colors" />
+            </div>
+          ) : (
+            <div className="w-20 h-20 rounded-xl gradient-primary flex items-center justify-center shadow-md">
+              <FileCheck className="w-8 h-8 text-white" />
+            </div>
+          )} */}
 
-                <button
-                  type="button"
-                  onClick={() => handleRemove(index)}
-                  className="p-2.5 hover:bg-destructive/10 rounded-xl transition-all duration-200 group flex-shrink-0"
-                >
-                  <X className="w-5 h-5 text-destructive group-hover:scale-110 transition-transform" />
-                </button>
-              </div>: <FilePreview file={file} label={file.label} accept={accept} onFileChange={(file) => onFileSelect(file)} isFileLoading={loading}/>
-            ))}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground truncate">
+              {fileName}
+            </p>
+            <div className="flex items-center gap-2 mt-1">
+              {file?.size && (
+                <span className="text-xs text-muted-foreground">
+                  {formatFileSize(file.size)}
+                </span>
+              )}
+              <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                <FileCheck className="w-3 h-3" />
+                <span className="text-xs font-medium">Ready</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => handleRemove(index)}
+          className="p-2.5 hover:bg-destructive/10 rounded-xl transition-all duration-200 group flex-shrink-0"
+        >
+          <X className="w-5 h-5 text-destructive group-hover:scale-110 transition-transform" />
+        </button>
+      </div>
+    );
+  } else {
+    return (
+      <FilePreview
+        key={index}
+        file={file}
+        label={file.label}
+        accept={accept}
+        onFileChange={(newFile) => onFileSelect(newFile)}
+        isFileLoading={loading}
+      />
+    );
+  }
+})}
+
 
             {multiple && (
               <label className="cursor-pointer flex items-center justify-center gap-2 p-4 border-2 border-dashed border-border rounded-xl hover:border-primary/50 hover:bg-secondary/20 transition-all">

@@ -11,7 +11,7 @@ import NeighbourStep from "../Components/Steppers/NeighboursStep";
 import SummaryStep from "../Components/Steppers/SummaryStep";
 import RoleSelection from "./RoleSelection";
 import { useAppDispatch, useAppSelector } from "../Store/hooks";
-import { nextStep, prevStep,setCurrentStep, setHasCompletedExServiceman, setHasSelectedRole, setIsValidationLoading, updateAadhaar, updateAddress, updateBasicDetails, updateFiles, updateLoadingFiles, updateNeighbour, updatePanCard, updateQualification, updateValidations, updateValidationsData } from "../Store/formSlice";
+import { nextStep, prevStep,setCurrentStep, setHasCompletedExServiceman, setHasSelectedRole, setIsValidationLoading, updateAadhaar, updateAddress, updateBasicDetails, updateExServiceman, updateFiles, updateLoadingFiles, updateNeighbour, updatePanCard, updateQualification, updateValidations, updateValidationsData } from "../Store/formSlice";
 import { toast } from "../Components/Ui/sonner";
 import { cn } from "../lib/utils";
 import { getStepValidationMessage, validateStep } from "../utils/formValidation";
@@ -19,10 +19,11 @@ import { use, useEffect, useState } from "react";
 import { convertToFormData } from "../utils/commonFunctions";
 import AwignLogo from "../assets/AwignLogo.png";
 import { useNavigate, useParams } from "react-router-dom";
-import { getAwignFormData, updateAwignFormData, validateDataApi } from "../services/api";
+import { getAwignFormData, updateAwignFormData, uploadAwignaFile, validateDataApi } from "../services/api";
 import ExServicemanStep from "../Components/Steppers/ExServicemanStep";
 import { extractInvalidFields } from "../utils/helperFunctions";
 import { CircularProgress } from "@mui/material";
+import ServiceManStep from "./ServiceManStep";
 
 const Index = () => {
     const { id } = useParams();
@@ -31,9 +32,8 @@ const Index = () => {
   const currentStep = useAppSelector((state) => state.form.currentStep);
   const hasSelectedRole = useAppSelector((state) => state.form.hasSelectedRole);
   const hasCompletedExServiceman = useAppSelector((state) => state.form.hasCompletedExServiceman);
-
+  const [isNextBtnLoading , setIsNextBtnLoading] = useState(false)
   const formState = useAppSelector((state) => state.form);
-
   const [isLoading, setIsLoading] = useState(false);
 
   // If role not selected, show role selection screen
@@ -125,13 +125,13 @@ try {
               });
               return;
             }
+          setIsNextBtnLoading(true);
     // Aadhaar step (step 2) special logic
     if (currentStep === 2) {
       try {
         await updateAwignFormData(`/${id}`, {
           [stepMap[currentStep]]:
             cleanedFormState[stepMap[currentStep]] || cleanedFormState,
-          currentStep: currentStep + 1,
         });
         dispatch(setIsValidationLoading(true));
 
@@ -149,16 +149,19 @@ try {
             defaultData: validationsData
           }}));
           window.scrollTo({ top: 0, behavior: 'smooth' });
+          setIsNextBtnLoading(false);
           dispatch(setIsValidationLoading(false));
           return; // ✅ Stops inside this block
         }else{
           dispatch(updateValidationsData({aadhaarValidations: {match: true}}));
           dispatch(setCurrentStep(currentStep + 1));
+          setIsNextBtnLoading(false);
           dispatch(setIsValidationLoading(false));
         }
       } catch (error) {
         toast.error("Aadhaar validation failed due to network error.");
         dispatch(setIsValidationLoading(false));
+        setIsNextBtnLoading(false);
         return;
       }
       return
@@ -169,7 +172,6 @@ try {
         await updateAwignFormData(`/${id}`, {
           [stepMap[currentStep]]:
             cleanedFormState[stepMap[currentStep]] || cleanedFormState,
-          currentStep: currentStep + 1,
         });
         dispatch(setIsValidationLoading(true));
 
@@ -187,24 +189,47 @@ try {
             defaultData: validationsData
           }}));
           window.scrollTo({ top: 0, behavior: 'smooth' });
+          setIsNextBtnLoading(false);
           dispatch(setIsValidationLoading(false));
           return; // ✅ Stops inside this block
         }else{
           dispatch(updateValidationsData({pan_validation: {match: true}}));
           dispatch(setIsValidationLoading(false));
+          setIsNextBtnLoading(false);
  dispatch(setCurrentStep(currentStep + 1));        }
       } catch (error) {
         toast.error("Aadhaar validation failed due to network error.");
         dispatch(setIsValidationLoading(false));
+        setIsNextBtnLoading(false);
         return;
       }
       return
     }     
+
+      if (currentStep === 4) {
+      if (formState.files.addressProofFile && formState.files.addressProofFile.length === 0) {
+        toast.error("Please upload at least one address proof file.");
+        return;
+      }
+
+      try {
+        uploadAwignaFile(id, formState.files.addressProofFile , "addressProofFile", true).then((res) =>{
+          dispatch(updateFiles(res.data.files))
+          dispatch(updateLoadingFiles({ passportPhoto: false }))
+        }).catch((err) => console.log(err))
+      } catch (error) {
+        console.error("Error uploading address proof:", error);
+        toast.error("Failed to upload address proof. Please try again.");
+      }
+    }
+
             updateAwignFormData(`/${id}`, { [stepMap[currentStep]]: cleanedFormState[stepMap[currentStep]] || cleanedFormState });
             dispatch(nextStep());
+            setIsNextBtnLoading(false);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           } else {
             handleSubmit();
+            setIsNextBtnLoading(false);
             toast.success("🎉 Form submitted successfully!", {
               description: "We'll review your application and get back to you soon.",
             });
@@ -299,14 +324,14 @@ try {
             window.scrollTo({ top: 0, behavior: 'smooth' });
           } else {
             // Validate all steps before the target step
-            // for (let i = currentStep; i < stepNumber; i++) {
-            //   if (!validateStep(i, formState)) {
-            //     toast.error("Cannot Skip Steps", {
-            //       description: getStepValidationMessage(i),
-            //     });
-            //     return;
-            //   }
-            // }
+            for (let i = currentStep; i < stepNumber; i++) {
+              if (!validateStep(i, formState)) {
+                toast.error("Cannot Skip Steps", {
+                  description: getStepValidationMessage(i),
+                });
+                return;
+              }
+            }
             dispatch(setCurrentStep(stepNumber));
             window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -330,13 +355,15 @@ useEffect(() => {
           // dispatch(updateRole({ selectedRole: data?.selectedRole }));
 
           dispatch(setHasSelectedRole(true));
-          dispatch(setHasCompletedExServiceman(true));
+          dispatch(setHasCompletedExServiceman(data?.exServiceman?.isExServiceman ? true : false));
+          dispatch(updateExServiceman({isExServiceman : data?.exServiceman?.isExServiceman}))
           dispatch(updateBasicDetails(data?.basicDetails ));
           dispatch(updateQualification(data?.qualification));
           dispatch(updateAadhaar(data?.aadhaar ));
           dispatch(updatePanCard(data?.panCard ));
           dispatch(updateAddress(data?.address ));
           dispatch(updateNeighbour(data?.neighbour));
+
           dispatch(updateFiles(data?.files));
           // dispatch(setCurrentStep(res?.current_page));
           dispatch(updateLoadingFiles({
@@ -383,73 +410,7 @@ useEffect(() => {
     return <RoleSelection />;
   }
   if (!hasCompletedExServiceman) {
-    return (
-      <div className="min-h-screen relative overflow-hidden">
-        {/* Animated Background */}
-
-        <div className="fixed inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-br from-background via-secondary/30 to-accent/20" />
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" />
-          <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" style={{ animationDelay: '2s' }} />
-        </div>
-
-        {/* Header */}
-        <header className="relative border-b border-border/50 backdrop-blur-xl bg-card/50">
-          <div className="container mx-auto px-6 py-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center shadow-glow">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold gradient-text">Application Portal</h1>
-                <p className="text-sm text-muted-foreground">Pre-step: Service Status</p>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        <div className="container mx-auto px-4 py-8 max-w-3xl">
-          <Card className="shadow-modern border-2 border-border/50 rounded-3xl overflow-hidden backdrop-blur-xl bg-card/80 animate-scale-in">
-            <div className="relative gradient-primary p-8 overflow-hidden">
-              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48cGF0aCBkPSJNLTEwIDMwaDYwdjJoLTYweiIgZmlsbD0iI2ZmZiIgZmlsbC1vcGFjaXR5PSIuMDUiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjYSkiLz48L3N2Zz4=')] opacity-10" />
-              <div className="relative">
-                <h2 className="text-3xl font-bold text-white mb-2">Ex-Serviceman Status</h2>
-                <p className="text-white/80 text-sm">Please provide your ex-serviceman status</p>
-              </div>
-            </div>
-
-            <div className="p-8">
-              <ExServicemanStep />
-            </div>
-          </Card>
-
-          <div className="flex justify-between items-center mt-8">
-          <Button
-            variant="outline"
-            onClick={() => {dispatch(setHasSelectedRole(false)); window.scrollTo({ top: 0, behavior: "smooth" });}}
-            // disabled={currentStep === 0}
-            className={cn(
-              "h-12 px-6 rounded-xl border-2 font-semibold transition-all duration-300",
-              "hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-            )}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-            <Button
-              onClick={() => dispatch(setHasCompletedExServiceman(true))}
-              className={cn(
-                "h-12 px-8 rounded-xl gradient-primary text-white font-bold shadow-glow",
-                "hover:scale-105 transition-all duration-300 hover:shadow-xl border-0"
-              )}
-            >
-              Continue
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
+    return <ServiceManStep/>
   }
 
   return (
@@ -572,14 +533,14 @@ useEffect(() => {
             Previous
           </Button>
 
-          <Button
+          {/* <Button
             variant="ghost"
             onClick={handleSaveChanges}
             className="h-12 px-6 rounded-xl font-semibold hover:bg-secondary/50 transition-all duration-300"
           >
             <Save className="w-4 h-4 mr-2" />
             Save Progress
-          </Button>
+          </Button> */}
 
           <Button
             onClick={handleNext}
@@ -588,6 +549,7 @@ useEffect(() => {
               "hover:scale-105 transition-all duration-300 hover:shadow-xl",
               "border-0"
             )}
+            disabled={isNextBtnLoading}
           >
             {currentStep === 6 ? (
               <>
@@ -596,6 +558,14 @@ useEffect(() => {
               </>
             ) : (
               <>
+              {isNextBtnLoading &&     <CircularProgress
+                    size={20}
+                    color="inherit"
+                    sx={{
+                      animation: "none !important", // optional
+                      marginRight: "8px",
+                    }}
+                  />}
                 Continue
                 <ArrowRight className="w-4 h-4 ml-2" />
               </>

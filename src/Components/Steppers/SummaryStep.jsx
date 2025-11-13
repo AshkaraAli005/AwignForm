@@ -362,19 +362,38 @@ const [selectedImage, setSelectedImage] = useState(null);
           value={form.address.permanentSameAsCurrent}
           canChange={false}
         />
-        <FilePreview
+        {form.files.addressProofFile && form.files.addressProofFile.map((file) => (<FilePreview
           label="Upload Permanent Address Proof (Minimum Last 10 Years Address proof)"
-          file={form.files.addressProofFile}
+          file={file}
           canChange={false}
           handleViewClick={(imgUrl) => {setPreviewImage(imgUrl)}}
-        />
+        />))}
       </Section>
 
-      <Section title="Neighbour Details" icon={Users} stepNumber={5}>
+      {/* <Section title="Neighbour Details" icon={Users} stepNumber={5}>
         <Field label="Neighbor 1 Details" value={form.neighbour.neighbor1Details} />
         <Field label="Neighbor 2 Details" value={form.neighbour.neighbor2Details} />
         <Field label="Nearest Police Station" value={form.neighbour.nearestPoliceStation} />
         <Field label="How Did You Know" value={form.neighbour.howDidYouKnow} />
+      </Section> */}
+
+        <Section title="Neighbor Information" icon={Users}>
+        <h2 className="text-lg font-semibold mb-2">Neighbor 1</h2>
+        <Field label="Name" value={formData.neighbour.neighbor1Name} fieldKey="neighbor1Name" section="neighbour" />
+        <Field label="Mobile Number" value={formData.neighbour.neighbor1Mobile} fieldKey="neighbor1Mobile" section="neighbour" />
+        <Field label="Address" value={formData.neighbour.neighbor1Address} fieldKey="neighbor1Address" section="neighbour" />
+        
+        <Separator className="my-4" />
+        
+        <h4 className="text-lg font-semibold mb-2">Neighbor 2</h4>
+        <Field label="Name" value={formData.neighbour.neighbor2Name} fieldKey="neighbor2Name" section="neighbour" />
+        <Field label="Mobile Number" value={formData.neighbour.neighbor2Mobile} fieldKey="neighbor2Mobile" section="neighbour" />
+        <Field label="Address" value={formData.neighbour.neighbor2Address} fieldKey="neighbor2Address" section="neighbour" />
+        
+        <Separator className="my-4" />
+        
+        <Field label="Nearest Police Station" value={formData.neighbour.nearestPoliceStation} fieldKey="nearestPoliceStation" section="neighbour" />
+        <Field label="How did you know" value={formData.neighbour.howDidYouKnow} fieldKey="howDidYouKnow" section="neighbour" />
       </Section>
     </div>
   );

@@ -10,6 +10,10 @@ import { useNavigate } from "react-router-dom";
 const IndexPre = () => {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    navigate("/form/new")
+  }, []);
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Animated Background */}

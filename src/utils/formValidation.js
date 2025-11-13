@@ -50,8 +50,12 @@ export const validateStep = (step, formState) => {
   
       case 5: // Neighbour
         return !!(
-          formState.neighbour.neighbor1Details &&
-          formState.neighbour.neighbor2Details &&
+          formState.neighbour.neighbor1Address &&
+          formState.neighbour.neighbor1Mobile &&
+          formState.neighbour.neighbor1Name &&
+          formState.neighbour.neighbor2Address &&
+          formState.neighbour.neighbor2Mobile &&
+          formState.neighbour.neighbor2Name &&
           formState.neighbour.nearestPoliceStation &&
           formState.neighbour.howDidYouKnow
         );

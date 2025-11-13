@@ -43,10 +43,15 @@ export const validateDataApi = (id) => {
   return apiRequest("post", `/validate-documents/${id}`);
 };
 
-export const uploadAwignaFile = (endpoint, file, name = "file" , config = {}) => {
+export const uploadAwignaFile = (endpoint, file, name = "file" ,isMultiple = false ,  config = {}) => {
   const formData = new FormData();
+  if(isMultiple){
+            file.forEach((file) => {
+          formData.append(name, file);
+        });
+  }else{
   formData.append(name, file);
-
+}
   return apiRequest("post", `/upload_files/${endpoint}`, formData, { 
     headers: { "Content-Type": "multipart/form-data" },
     ...config,

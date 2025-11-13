@@ -1,4 +1,4 @@
-import { Users, MapPin } from "lucide-react";
+import { Users, MapPin, Home, Phone } from "lucide-react";
 import FormField from "../FormField";
 import { useAppDispatch, useAppSelector } from "../../Store/hooks";
 import { updateNeighbour } from "../../Store/formSlice";
@@ -22,78 +22,83 @@ const NeighbourStep = () => {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <Label className="flex items-center gap-2 text-sm font-medium">
-          <div className="w-6 h-6 rounded bg-[hsl(var(--form-icon-bg))] text-[hsl(var(--form-icon-text))] flex items-center justify-center">
-            <Users className="w-4 h-4" />
-          </div>
-          Neighbor 1 details
-          <span className="text-destructive ml-1">*</span>
-        </Label>
-        <Dialog open={isNeighbor1DialogOpen} onOpenChange={setIsNeighbor1DialogOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" className="text-primary border-primary hover:bg-primary/10">
-              Fill details &gt;
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Neighbor 1 Details</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <FormField
-                icon={Users}
-                label="Neighbor 1 Name"
-                required
-                value={neighbour.neighbor1Details}
-                onChange={(value) => dispatch(updateNeighbour({ neighbor1Details: value }))}
-              />
-              <Button onClick={() => setIsNeighbor1DialogOpen(false)} className="w-full">
-                Save Details
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+
+
+            <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+          <Users className="w-5 h-5" />
+          Neighbor 1 Details
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            icon={Users}
+            label="Neighbor 1 Name"
+            required
+            value={neighbour.neighbor1Name}
+            onChange={(value) => dispatch(updateNeighbour({ neighbor1Name: value }))}
+            placeholder="Enter name"
+          />
+          <FormField
+            icon={Phone}
+            label="Mobile Number"
+            required
+            type="number"
+            value={neighbour.neighbor1Mobile}
+            onChange={(value) => dispatch(updateNeighbour({ neighbor1Mobile: value }))}
+            placeholder="Enter mobile number"
+          />
+        </div>
+        <FormField
+          icon={Home}
+          label="Address"
+          required
+          value={neighbour.neighbor1Address}
+          onChange={(value) => dispatch(updateNeighbour({ neighbor1Address: value }))}
+          placeholder="Enter address"
+        />
       </div>
 
-      <div className="space-y-2">
-        <Label className="flex items-center gap-2 text-sm font-medium">
-          <div className="w-6 h-6 rounded bg-[hsl(var(--form-icon-bg))] text-[hsl(var(--form-icon-text))] flex items-center justify-center">
-            <Users className="w-4 h-4" />
-          </div>
-          Neighbor 2 details
-          <span className="text-destructive ml-1">*</span>
-        </Label>
-        <Dialog open={isNeighbor2DialogOpen} onOpenChange={setIsNeighbor2DialogOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" className="text-primary border-primary hover:bg-primary/10">
-              Fill details &gt;
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Neighbor 2 Details</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <FormField
-                icon={Users}
-                label="Neighbor 2 Name"
-                required
-                value={neighbour.neighbor2Details}
-                onChange={(value) => dispatch(updateNeighbour({ neighbor2Details: value }))}
-              />
-              <Button onClick={() => setIsNeighbor2DialogOpen(false)} className="w-full">
-                Save Details
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+      {/* Neighbor 2 */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+          <Users className="w-5 h-5" />
+          Neighbor 2 Details
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            icon={Users}
+            label="Neighbor 2 Name"
+            required
+            value={neighbour.neighbor2Name}
+            onChange={(value) => dispatch(updateNeighbour({ neighbor2Name: value }))}
+            placeholder="Enter name"
+          />
+          <FormField
+            icon={Phone}
+            label="Mobile Number"
+            required
+
+            type="number"
+            value={neighbour.neighbor2Mobile}
+            onChange={(value) => dispatch(updateNeighbour({ neighbor2Mobile: value }))}
+            placeholder="Enter mobile number"
+          />
+        </div>
+        <FormField
+          icon={Home}
+          label="Address"
+          required
+          value={neighbour.neighbor2Address}
+          onChange={(value) => dispatch(updateNeighbour({ neighbor2Address: value }))}
+          placeholder="Enter address"
+        />
       </div>
 
       <FormField
         icon={MapPin}
         label="Nearest Police station"
         required
+        placeholder={"Enter nearby police station"}
         value={neighbour.nearestPoliceStation}
         onChange={(value) => dispatch(updateNeighbour({ nearestPoliceStation: value }))}
       />

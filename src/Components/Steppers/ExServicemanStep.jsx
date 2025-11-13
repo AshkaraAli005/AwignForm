@@ -4,11 +4,16 @@ import { Label } from "../../Components/Ui/label";
 import { cn } from "../../lib/utils";
 import FileUpload from "../FileUpload";
 import { useAppDispatch, useAppSelector } from "../../Store/hooks";
-import { updateExServiceman } from "../../Store/formSlice";
+import { updateExServiceman, updateFiles, updateLoadingFiles } from "../../Store/formSlice";
+import { useParams } from "react-router-dom";
+import { uploadAwignaFile } from "../../services/api";
 
 const ExServicemanStep = () => {
   const dispatch = useAppDispatch();
   const exServiceman = useAppSelector((state) => state.form.exServiceman);
+  const formData = useAppSelector((state) => state.form);
+     const {id} = useParams()
+  
 
   return (
     <div className="space-y-6">
@@ -53,8 +58,20 @@ const ExServicemanStep = () => {
             required
             validationType="document"
             accept="image/*,.pdf"
-            value={exServiceman.dischargeBook}
-            onFileSelect={(file) => dispatch(updateExServiceman({ dischargeBook: file }))}
+            value={formData?.files?.exServiceDischargeBook}
+            // onFileSelect={(file) => dispatch(updateExServiceman({ exServiceDischargeBook: file }))}
+            onFileSelect={(file) =>{
+              dispatch(updateLoadingFiles({ exServiceDischargeBook: true }))
+              uploadAwignaFile(id, file, "exServiceDischargeBook").then((res) =>{
+                dispatch(updateFiles({exServiceDischargeBook : res.data.files.exServiceDischargeBook}))
+                dispatch(updateLoadingFiles({ exServiceDischargeBook: false }))
+              }).catch((err) => {
+                dispatch(updateFiles({exServiceDischargeBook : file}))
+                dispatch(updateLoadingFiles({ exServiceDischargeBook: false }))
+                console.log(err)})
+                dispatch(updateFiles({exServiceDischargeBook : file}))
+            }}
+            loading={formData?.loadingFiles?.exServiceDischargeBook}
           />
 
           <FileUpload
@@ -62,8 +79,19 @@ const ExServicemanStep = () => {
             required
             validationType="document"
             accept="image/*,.pdf"
-            value={exServiceman.exServicemanId}
-            onFileSelect={(file) => dispatch(updateExServiceman({ exServicemanId: file }))}
+            value={formData?.files?.exServicemanIdZilaSanikBoard}
+            // onFileSelect={(file) => dispatch(updateExServiceman({ exServicemanIdZilaSanikBoard: file }))}
+                        onFileSelect={(file) =>{
+              dispatch(updateLoadingFiles({ exServicemanIdZilaSanikBoard: true }))
+              uploadAwignaFile(id, file, "exServicemanIdZilaSanikBoard").then((res) =>{
+                dispatch(updateFiles({exServicemanIdZilaSanikBoard : res.data.files.exServicemanIdZilaSanikBoard}))
+                dispatch(updateLoadingFiles({ exServicemanIdZilaSanikBoard: false }))
+              }).catch((err) => {
+                dispatch(updateFiles({exServicemanIdZilaSanikBoard : file}))
+                dispatch(updateLoadingFiles({ exServicemanIdZilaSanikBoard: false }))
+                console.log(err)})
+                dispatch(updateFiles({exServicemanIdZilaSanikBoard : file}))
+            }}
           />
         </div>
       )}

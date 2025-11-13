@@ -276,22 +276,22 @@ const AddressStep = () => {
         label="Upload Permanent Address Proof (Minimum Last 10 Years Address proof)"
         required
         value={formData.files.addressProofFile}
-        // multiple={true}
+        multiple={true}
         validationType="document"
         accept="image/*,.pdf"
-        // onFileSelect={(file) =>
-        //   dispatch(updateAddress({ addressProofFile: file }))
-        // }
-        onFileSelect={(file) =>{
-          dispatch(updateLoadingFiles({ addressProofFile: true }))
-          uploadAwignaFile(id, file, "addressProofFile").then((res) =>{
-            dispatch(updateFiles({addressProofFile : res.data.files.addressProofFile}))
-            dispatch(updateLoadingFiles({ addressProofFile: false }))
-          }).catch((err) => {
-            dispatch(updateFiles({addressProofFile : file}))
-            dispatch(updateLoadingFiles({ addressProofFile: false }))
-            console.log(err)})
-        }}
+        onFileSelect={(file) =>
+          dispatch(updateFiles({ addressProofFile: file }))
+        }
+        // onFileSelect={(file) =>{
+        //   dispatch(updateLoadingFiles({ addressProofFile: true }))
+        //   uploadAwignaFile(id, file, "addressProofFile").then((res) =>{
+        //     dispatch(updateFiles({addressProofFile : res.data.files.addressProofFile}))
+        //     dispatch(updateLoadingFiles({ addressProofFile: false }))
+        //   }).catch((err) => {
+        //     dispatch(updateFiles({addressProofFile : file}))
+        //     dispatch(updateLoadingFiles({ addressProofFile: false }))
+        //     console.log(err)})
+        // }}
       />
 
       <div className="space-y-2">
